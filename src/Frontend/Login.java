@@ -4,16 +4,24 @@
  */
 package Frontend;
 
-/**
- *
- * @author omars
- */
-public class login extends javax.swing.JFrame {
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import models.User;
+import models.Student;
+import models.Instructor;
+import jsondatabase.JsonDatabaseManager;
+
+public class Login extends javax.swing.JFrame {
 
     /**
-     * Creates new form Login
+     * Creates new form login
      */
-    public login() {
+    public Login() {
+        setLocationRelativeTo(null);
+        setTitle("Login");
         initComponents();
     }
 
@@ -26,25 +34,190 @@ public class login extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        textUsername = new javax.swing.JTextField();
+        textPassword = new javax.swing.JPasswordField();
+        cmbRole = new javax.swing.JComboBox<>();
+        btnLogin = new javax.swing.JButton();
+        signup = new javax.swing.JButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabel2.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel2.setText("Password:");
+
+        jLabel3.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel3.setText("Role:");
+
+        jLabel4.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel4.setText("Username:");
+
+        cmbRole.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Choose Role", "Student", "Instructor" }));
+
+        btnLogin.setText("LOGIN");
+        btnLogin.setBorder(new javax.swing.border.MatteBorder(null));
+        btnLogin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoginActionPerformed(evt);
+            }
+        });
+
+        signup.setText("Don't Have Account? Register Now");
+        signup.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        signup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                signupActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(127, 127, 127)
+                        .addComponent(textPassword))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addGap(178, 178, 178)
+                        .addComponent(cmbRole, 0, 126, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addGap(122, 122, 122)
+                        .addComponent(textUsername, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)))
+                .addGap(14, 14, 14))
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(155, 155, 155)
+                        .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(102, 102, 102)
+                        .addComponent(signup)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(42, 42, 42)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(textUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(37, 37, 37)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(textPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(36, 36, 36)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(cmbRole, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(signup)
+                .addGap(35, 35, 35))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
+    private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
+   try {
+        String username = textUsername.getText().trim();
+        char[] pwdChars = textPassword.getPassword(); // get raw password
+        String password = new String(pwdChars);
+        String selectedRole = cmbRole.getSelectedItem().toString();
+
+        // ----------- VALIDATION -----------
+        if (username.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter username.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter password.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (selectedRole.equals("Choose Role")) {
+            JOptionPane.showMessageDialog(this, "Please select a role.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // ----------- HASH USER INPUT PASSWORD -----------
+        String hashedInput = hashPassword(password);
+
+        // ----------- LOAD USERS FROM JSON -----------
+        jsondatabase.JsonDatabaseManager db = new jsondatabase.JsonDatabaseManager();
+        java.util.List<models.User> users = db.loadUsers();
+
+        // ----------- FIND USER BY USERNAME -----------
+        models.User found = null;
+        for (models.User u : users) {
+            if (u.getUsername().equalsIgnoreCase(username)) {
+                found = u;
+                break;
+            }
+        }
+
+        if (found == null) {
+            JOptionPane.showMessageDialog(this, "User not found.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // ----------- CHECK ROLE MATCH -----------
+        if (!found.getRole().equalsIgnoreCase(selectedRole)) {
+            JOptionPane.showMessageDialog(this, "Incorrect role selected.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // ----------- VERIFY HASHED PASSWORD -----------
+        if (!found.getPasswordHash().equals(hashedInput)) {
+            JOptionPane.showMessageDialog(this, "Incorrect password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // ----------- SUCCESS -----------
+        JOptionPane.showMessageDialog(this, "Welcome " + found.getUsername(), "Login Successful", JOptionPane.INFORMATION_MESSAGE);
+
+        // ----------- OPEN DASHBOARDS -----------
+        if (selectedRole.equalsIgnoreCase("STUDENT")) {
+            new Frontend.StudentDashboard().setVisible(true);
+        } else if (selectedRole.equalsIgnoreCase("INSTRUCTOR")) {
+            new Frontend.InstructorDashboard().setVisible(true);
+        }
+
+        this.dispose(); // close login frame
+
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "An unexpected error occurred: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        ex.printStackTrace();
+    }
+    }//GEN-LAST:event_btnLoginActionPerformed
+
+    private void signupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_signupActionPerformed
+        this.setVisible(false);
+        Signup s=new Signup();
+        s.setVisible(true);
+    }//GEN-LAST:event_signupActionPerformed
+private String hashPassword(String rawPassword) {
+    try {
+        java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+        byte[] bytes = md.digest(rawPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8)); // always UTF-8
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    } catch (java.security.NoSuchAlgorithmException e) {
+        throw new RuntimeException("SHA-256 algorithm not found", e);
+    }
+}
+  
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -59,24 +232,32 @@ public class login extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(loginpage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(loginpage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(loginpage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(loginpage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new login().setVisible(true);
+                new Login().setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnLogin;
+    private javax.swing.JComboBox<String> cmbRole;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JButton signup;
+    private javax.swing.JPasswordField textPassword;
+    private javax.swing.JTextField textUsername;
     // End of variables declaration//GEN-END:variables
 }

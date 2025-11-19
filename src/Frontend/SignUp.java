@@ -3,17 +3,28 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Frontend;
-
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import models.User;
+import models.Student;
+import models.Instructor;
+import jsondatabase.JsonDatabaseManager;
 /**
  *
- * @author omars
+ * @author SHIKO
  */
-public class signup extends javax.swing.JFrame {
+@SuppressWarnings("deprecation")
+public class Signup extends javax.swing.JFrame {
 
     /**
-     * Creates new form SignUp
+     * Creates new form Signup
      */
-    public signup() {
+    public Signup() {
+        setTitle("Sign Up page");
+        setLocationRelativeTo(null);
         initComponents();
     }
 
@@ -26,25 +37,243 @@ public class signup extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        textUsername = new javax.swing.JTextField();
+        textPassword = new javax.swing.JPasswordField();
+        cmbRole = new javax.swing.JComboBox<>();
+        textUserId = new javax.swing.JTextField();
+        btnSignup = new javax.swing.JButton();
+        textEmail = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabel4.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel4.setText("Username:");
+
+        jLabel5.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel5.setText("UserId:");
+
+        jLabel6.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel6.setText("Email:");
+
+        jLabel7.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel7.setText("Password:");
+
+        jLabel8.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel8.setText("Role:");
+
+        textPassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textPasswordActionPerformed(evt);
+            }
+        });
+
+        cmbRole.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Choose Role", "Student", "Instructor" }));
+        cmbRole.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbRoleActionPerformed(evt);
+            }
+        });
+
+        btnSignup.setText("SIGN UP");
+        btnSignup.setBorder(new javax.swing.border.MatteBorder(null));
+        btnSignup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSignupActionPerformed(evt);
+            }
+        });
+
+        jButton1.setText("Already Have Account? Log In");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addGap(126, 126, 126)
+                                .addComponent(textUsername, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel5)
+                                .addGap(159, 159, 159)
+                                .addComponent(textUserId, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addGap(168, 168, 168)
+                                .addComponent(textEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addGap(131, 131, 131)
+                                .addComponent(textPassword))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addGap(182, 182, 182)
+                                .addComponent(cmbRole, 0, 126, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(144, 144, 144)
+                                .addComponent(btnSignup, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(101, 101, 101)
+                                .addComponent(jButton1)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(textUserId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(textUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(textEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(textPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(28, 28, 28)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(cmbRole, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSignup, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton1)
+                .addContainerGap(7, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
+    private void textPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textPasswordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textPasswordActionPerformed
+
+    private void cmbRoleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbRoleActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbRoleActionPerformed
+
+    private void btnSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignupActionPerformed
+           try {
+        // ----------- READ INPUTS -----------
+        String userIdStr = textUserId.getText();
+        String username = textUsername.getText().trim();
+        String email = textEmail.getText().trim();
+        char[] pwdChars = textPassword.getPassword(); // get raw password
+        String password = new String(pwdChars);
+        String selectedRole = cmbRole.getSelectedItem().toString();
+
+        // ----------- VALIDATION -----------
+        if (userIdStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter user ID.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int userId;
+        try {
+            userId = Integer.parseInt(userIdStr);
+            if (userId <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "User ID must be a positive integer.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (username.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter username.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (email.isEmpty() || !email.matches("^[^@\\s]+@[^@\\s]+\\.com$")) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid email (example@domain.com).", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter password.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (selectedRole.equals("Choose Role")) {
+            JOptionPane.showMessageDialog(this, "Please select a role.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // ----------- LOAD USERS -----------
+        jsondatabase.JsonDatabaseManager db = new jsondatabase.JsonDatabaseManager();
+        java.util.List<models.User> users = db.loadUsers();
+
+        // Check duplicate userId
+        for (models.User u : users) {
+            if (u.getUserId() == userId) {
+                JOptionPane.showMessageDialog(this, "User ID already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        // ----------- CREATE USER OBJECT (raw password passed, constructor hashes it) -----------
+        models.User newUser;
+        if (selectedRole.equalsIgnoreCase("STUDENT")) {
+            newUser = new models.Student(new java.util.ArrayList<>(), new java.util.ArrayList<>(), userId, username, email, password, models.User.ROLE_STUDENT);
+        } else { // Instructor
+            newUser = new models.Instructor(userId, username, email, password);
+        }
+
+        // ----------- ADD USER TO JSON -----------
+        db.addUser(newUser);
+        JOptionPane.showMessageDialog(this, "User registered successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+        // Optionally, close signup and open login
+        this.setVisible(false);
+        new Frontend.Login().setVisible(true);
+
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "An unexpected error occurred: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        ex.printStackTrace();
+    }
+
+    }//GEN-LAST:event_btnSignupActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        this.setVisible(false);
+        Login s=new Login();
+        s.setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
+    private String hashPassword(String rawPassword) {
+    try {
+        java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+        byte[] bytes = md.digest(rawPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8)); // always UTF-8
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    } catch (java.security.NoSuchAlgorithmException e) {
+        throw new RuntimeException("SHA-256 algorithm not found", e);
+    }
+}
+  
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -59,24 +288,36 @@ public class signup extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(SignUp.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Signup.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SignUp.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Signup.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SignUp.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Signup.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(SignUp.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Signup.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new signup().setVisible(true);
+                new Signup().setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnSignup;
+    private javax.swing.JComboBox<String> cmbRole;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JTextField textEmail;
+    private javax.swing.JPasswordField textPassword;
+    private javax.swing.JTextField textUserId;
+    private javax.swing.JTextField textUsername;
     // End of variables declaration//GEN-END:variables
 }
