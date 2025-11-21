@@ -21,7 +21,7 @@ public class JsonDatabaseManager {
             File folder = new File(DATA_FOLDER);
             if (!folder.exists()) folder.mkdirs();
 
-            File usersFile = new File(USERS_FILE);
+            File usersFile = new File(USERS_FILE); 
             if (!usersFile.exists()) {
                 try (PrintWriter pw = new PrintWriter(new FileWriter(usersFile))) {
                     pw.println("[]"); // empty JSON array
@@ -157,8 +157,9 @@ public class JsonDatabaseManager {
                 String title = obj.getString("title");
                 String description = obj.getString("description");
                 String instructorId = obj.getString("instructorId");
-
-                Course c = new Course(courseId, title, description, instructorId);
+                String status = obj.optString("status", "PENDING");
+                   
+                Course c = new Course(courseId, title, description, instructorId, status);
 
                 JSONArray studentsArray = obj.optJSONArray("students");
                 if (studentsArray != null) {
@@ -199,7 +200,8 @@ public class JsonDatabaseManager {
             obj.put("description", c.getDescription());
             obj.put("instructorId", c.getInstructorId());
             obj.put("students", new JSONArray(c.getStudents()));
-
+            obj.put("status", c.getStatus());
+            
             JSONArray lessonsArray = new JSONArray();
             for (Lesson l : c.getLessons()) {
                 JSONObject lObj = new JSONObject();

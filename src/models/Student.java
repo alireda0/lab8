@@ -10,11 +10,18 @@ public class Student extends User{
     private List<String> enrolledCourseIds;
     private List<String> completedLessonIds;
 
-    public Student(List<String> enrolledCourdseIds, List<String> completedLesssonIds, int userId, String username, String email, String rawPassword, String role, boolean isAlreadyHashed) {
-        super(userId, username, email, rawPassword, role, isAlreadyHashed);
-        this.enrolledCourseIds = new ArrayList<String>();
-        this.completedLessonIds = new ArrayList<String>();
-    }
+    public Student(List<String> enrolledCourseIds, List<String> completedLessonIds,
+               int userId, String username, String email,
+               String passwordHash, String role, boolean isAlreadyHashed) {
+
+    super(userId, username, email, passwordHash, role, isAlreadyHashed);
+
+    this.enrolledCourseIds = new ArrayList<>();
+    this.enrolledCourseIds.addAll(enrolledCourseIds);
+
+    this.completedLessonIds = new ArrayList<>();
+    this.completedLessonIds.addAll(completedLessonIds);
+}
 
     public List<String> getEnrolledCourdseIds() {
         return enrolledCourseIds;

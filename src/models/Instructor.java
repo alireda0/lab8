@@ -15,7 +15,7 @@ public class Instructor extends User{
     
     private List<String> createdCourses;
     
-    public Instructor(int userId, String username, String email, String rawPassword, boolean isAlreadyHashed) {
+     public Instructor(int userId, String username, String email, String rawPassword, boolean isAlreadyHashed) {
         super(userId, username, email, rawPassword, ROLE_INSTRUCTOR, isAlreadyHashed);
         //role instructor is already passed
         

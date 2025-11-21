@@ -8,10 +8,11 @@ public class Course {
     private String courseId;              // changed from int → String
     private String title;
     private String description;
-    private String instructorId;          // changed from int → String
+    private String instructorId; // changed from int → String
+    private String status;
     private List<Lesson> lessons;         // List of lesson objects
     private List<String> students;        // changed from List<Integer> → List<String>
-
+    
     // -------------------- Constructors --------------------
 
     public Course() {
@@ -19,11 +20,12 @@ public class Course {
         this.students = new ArrayList<>();
     }
 
-    public Course(String courseId, String title, String description, String instructorId) {
+    public Course(String courseId, String title, String description, String instructorId, String status) {
         this.courseId = courseId;
         this.title = title;
         this.description = description;
         this.instructorId = instructorId;
+        this.status = status;
         this.lessons = new ArrayList<>();
         this.students = new ArrayList<>();
     }
@@ -54,6 +56,11 @@ public class Course {
         return students;
     }
 
+    public String getStatus() {
+        return status;
+    }
+    
+
     // -------------------- Setters --------------------
 
     public void setCourseId(String courseId) {
@@ -70,6 +77,10 @@ public class Course {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     // -------------------- Course Operations --------------------
