@@ -179,7 +179,7 @@ public class AddCourse extends javax.swing.JFrame {
             String instructorIdStr = String.valueOf(loggedInstructor.getUserId());
 
             // 1. Create new Course Object
-            Course newCourse = new Course(cID, cTitle, cDescription, instructorIdStr);
+            Course newCourse = new Course(cID, cTitle, cDescription, instructorIdStr,"PENDING");
 
             // 2. Process Lessons (Split by comma)
             String[] lessonTitles = cLessonsRaw.split(",");
