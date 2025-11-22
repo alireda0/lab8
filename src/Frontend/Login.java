@@ -199,9 +199,9 @@ if (!found.getPasswordHash().equals(hashedInput)) {
 
         // ----------- OPEN DASHBOARDS -----------
         if (selectedRole.equalsIgnoreCase("STUDENT")) {
-            new Frontend.StudentDashboard().setVisible(true);
+            new Frontend.StudentDashboard((Student)found).setVisible(true);
         } else if (selectedRole.equalsIgnoreCase("INSTRUCTOR")) {
-            new Frontend.InstructorDashboard().setVisible(true);
+            new Frontend.InstructorDashboard((Instructor)found).setVisible(true);
         }
 
         this.dispose(); // close login frame
