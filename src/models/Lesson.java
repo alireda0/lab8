@@ -8,6 +8,7 @@ public class Lesson {
     private String title;
     private String content;
     private List<String> resources;  // Optional (URLs, file paths, etc.)
+
     
     // ----------------- Constructors -----------------
 
@@ -55,4 +56,13 @@ public class Lesson {
     public void setResources(List<String> resources) {
         this.resources = resources;
     }
+
+    public Quiz getQuiz() {
+        return quiz;
+    }
+
+    public void setQuiz(Quiz quiz) {
+        this.quiz = quiz;
+    }
+    
 }

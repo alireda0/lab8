@@ -1,54 +1,96 @@
-
 package models;
-import java.util.ArrayList;
-import java.util.List;
-/**
- *
- * @author engom
- */
+import java.util.*;
+import org.json.JSONTokener;
+
 public class Student extends User{
     private List<String> enrolledCourseIds;
     private List<String> completedLessonIds;
+
     
+   public Student(List<String> enrolledCourseIds,
+               List<String> completedLessonIds,
+               int userId,
+               String username,
+               String email,
+               String rawPassword,
+               String role,
+               boolean isAlreadyHashed) {
 
-    public Student(List<String> enrolledCourseIds, List<String> completedLessonIds,
-               int userId, String username, String email,
-               String passwordHash, String role, boolean isAlreadyHashed) {
+    super(userId, username, email, rawPassword, role, isAlreadyHashed);
 
-    super(userId, username, email, passwordHash, role, isAlreadyHashed);
-
-    this.enrolledCourseIds = new ArrayList<>();
-    this.enrolledCourseIds.addAll(enrolledCourseIds);
-
-    this.completedLessonIds = new ArrayList<>();
-    this.completedLessonIds.addAll(completedLessonIds);
+    this.enrolledCourseIds = enrolledCourseIds != null ? enrolledCourseIds : new ArrayList<>();
+    this.completedLessonIds = completedLessonIds != null ? completedLessonIds : new ArrayList<>();
 }
-
-    public List<String> getEnrolledCourdseIds() {
+   
+    public List<String> getEnrolledCourseIds() {
         return enrolledCourseIds;
     }
-    public void enrollInCourse(String CourseId){
-        if(CourseId == null || CourseId.trim().isEmpty())
-            return;
-        if(!enrolledCourseIds.contains(CourseId))
-            enrolledCourseIds.add(CourseId);
+
+    public void setEnrolledCourseIds(List<String> enrolledCourseIds) {
+        this.enrolledCourseIds = enrolledCourseIds;
     }
 
-    public List<String> getCompletedLesssonIds() {
+    public List<String> getCompletedLessonIds() {
         return completedLessonIds;
     }
-    public boolean isEnrolledinCourse(String CourseId){
-        return enrolledCourseIds.contains(CourseId);
+
+    public void setCompletedLessonIds(List<String> completedLessonIds) {
+        this.completedLessonIds = completedLessonIds;
     }
-    public boolean hasCompletedLesson(String LessonId){
-        return completedLessonIds.contains(LessonId);
+
+    public List<Certificate> getCertificates() {
+        return certificates;
     }
-    public void markLessonCompleted(String lessonId){
-        if(lessonId==null || lessonId.trim().isEmpty())
-            return;
-        if(!completedLessonIds.contains(lessonId))
-            completedLessonIds.add(lessonId);
+
+    public void setCertificates(List<Certificate> certificates) {
+        this.certificates = certificates;
+    }
+
+    public Map<String, List<QuizAttempt>> getQuizAttemptsByLesson() { return quizAttemptsByLesson; }
+
+    public void addQuizAttempt(String lessonId, QuizAttempt attempt) {
+        if (lessonId == null || attempt == null) return;
+        quizAttemptsByLesson.computeIfAbsent(lessonId, k -> new ArrayList<>()).add(attempt);
+    }
+
+    public List<QuizAttempt> getAttemptsForLesson(String lessonId) {
+        return quizAttemptsByLesson.getOrDefault(lessonId, new ArrayList<>());
+    }
+
+    public boolean hasPassedLesson(String lessonId, int passingPercentage) {
+        List<QuizAttempt> attempts = getAttemptsForLesson(lessonId);
+        for (QuizAttempt a : attempts) {
+            if (a.getScore() >= passingPercentage) return true;
+        }
+        return false;
+    }
+
+    public JSONTokener getCompletedLesssonIds() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public JSONTokener getEnrolledCourdseIds() {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+
+    public List<QuizAttempt> getAttemptsForCourseLesson(String courseId, String lid) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+
+    public boolean hasCompletedLesson(String lid) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+
+    public void markLessonCompleted(String lessonId) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+
+    public void enrollInCourse(String courseId) {
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
     
-    
+    public void addCertificate(Certificate c) {
+    certificates.add(c);
+    }
+
 }

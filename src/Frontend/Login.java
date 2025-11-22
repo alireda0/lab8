@@ -195,14 +195,7 @@ if (!found.getPasswordHash().equals(hashedInput)) {
         JOptionPane.showMessageDialog(this, "Welcome " + found.getUsername(), "Login Successful", JOptionPane.INFORMATION_MESSAGE);
 
         // ----------- OPEN DASHBOARDS -----------
-        // ----------- OPEN DASHBOARDS -----------
-if (selectedRole.equalsIgnoreCase("STUDENT")) {
-    Student student = (Student) found;  // Cast the found user to Student
-    new Frontend.StudentDashboard(student).setVisible(true);  // Pass it!
-} else if (selectedRole.equalsIgnoreCase("INSTRUCTOR")) {
-    Instructor instructor = (Instructor) found;  // Cast to Instructor
-    //new Frontend.InstructorDashboard(instructor).setVisible(true);  // Pass it if needed
-}
+
 
         this.dispose(); // close login frame
 

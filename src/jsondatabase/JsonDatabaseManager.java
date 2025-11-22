@@ -8,6 +8,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class JsonDatabaseManager {
 
@@ -40,55 +41,110 @@ public class JsonDatabaseManager {
     }
 
     // ------------------ USERS -------------------
-    public List<User> loadUsers() {
-        ensureDataFilesExist();
-        List<User> users = new ArrayList<>();
+ public List<User> loadUsers() { 
+    ensureDataFilesExist();
+    List<User> users = new ArrayList<>();
 
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(USERS_FILE)));
-            JSONArray array = new JSONArray(content);
+    try {
+        String content = new String(Files.readAllBytes(Paths.get(USERS_FILE)));
+        JSONArray array = new JSONArray(content);
 
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject obj = array.getJSONObject(i);
-                String role = obj.getString("role");
-                int userId = obj.getInt("userId");
-                String username = obj.getString("username");
-                String email = obj.getString("email");
-                String passwordHash = obj.getString("passwordHash");
+        for (int i = 0; i < array.length(); i++) {
 
-                if ("STUDENT".equals(role)) {
-                    JSONArray enrolledArray = obj.optJSONArray("enrolledCourseIds");
-                    JSONArray completedArray = obj.optJSONArray("completedLessonIds");
+            JSONObject obj = array.getJSONObject(i);
+            String role = obj.getString("role");
+            int userId = obj.getInt("userId");
+            String username = obj.getString("username");
+            String email = obj.getString("email");
+            String passwordHash = obj.getString("passwordHash");
 
-                    List<String> enrolled = new ArrayList<>();
-                    List<String> completed = new ArrayList<>();
+            // ============================
+            // STUDENT
+            // ============================
+            if ("STUDENT".equals(role)) {
 
-                    if (enrolledArray != null) {
-                        for (int j = 0; j < enrolledArray.length(); j++)
-                            enrolled.add(enrolledArray.getString(j));
-                    }
-                    if (completedArray != null) {
-                        for (int j = 0; j < completedArray.length(); j++)
-                            completed.add(completedArray.getString(j));
-                    }
+                JSONArray enrolledArray = obj.optJSONArray("enrolledCourseIds");
+                JSONArray completedArray = obj.optJSONArray("completedLessonIds");
 
-                    Student s = new Student(new ArrayList<>(), new ArrayList<>(), userId, username, email, passwordHash, role, true);
-                    s.getEnrolledCourdseIds().addAll(enrolled);
-                    s.getCompletedLesssonIds().addAll(completed);
-                    users.add(s);
+                List<String> enrolled = new ArrayList<>();
+                List<String> completed = new ArrayList<>();
 
-                } else if ("INSTRUCTOR".equals(role)) {
-                    Instructor ins = new Instructor(userId, username, email, passwordHash, true);
-                    users.add(ins);
+                if (enrolledArray != null) {
+                    for (int j = 0; j < enrolledArray.length(); j++)
+                        enrolled.add(enrolledArray.getString(j));
                 }
+
+                if (completedArray != null) {
+                    for (int j = 0; j < completedArray.length(); j++)
+                        completed.add(completedArray.getString(j));
+                }
+
+                // NOTE: true => passwordHash is already hashed
+                Student s = new Student(
+                        new ArrayList<>(), 
+                        new ArrayList<>(),
+                        userId, username, email, passwordHash,
+                        role,
+                        true
+                );
+                
+                JSONArray certsArr = obj.optJSONArray("certificates");
+                if (certsArr != null) {
+                for (int j = 0; j < certsArr.length(); j++) {
+                JSONObject cObj = certsArr.getJSONObject(j);
+                Certificate cert = new Certificate(
+                cObj.getString("certificateId"),
+                cObj.getInt("studentId"),
+                cObj.getString("courseId"),
+                cObj.getString("issueDate")
+                );
+                s.getCertificates().add(cert);
+    }
+}
+
+                
+                s.getEnrolledCourseIds().addAll(enrolled);
+                s.getCompletedLessonIds().addAll(completed);
+
+                users.add(s);
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            // ============================
+            // INSTRUCTOR
+            // ============================
+            else if ("INSTRUCTOR".equals(role)) {
+
+                Instructor ins = new Instructor(
+                        userId, username, email, passwordHash,
+                        true   // ← password already hashed
+                );
+
+                users.add(ins);
+            }
+
+            // ============================
+            // ADMIN
+            // ============================
+            else if ("ADMIN".equals(role)) {
+
+                Admin admin = new Admin(
+                        userId, username, email, passwordHash,
+                        true   // ← password already hashed
+                );
+
+                users.add(admin);
+            }
         }
 
-        return users;
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+
+    return users;
+}
+
+
+
 
     public void saveUsers(List<User> users) {
         ensureDataFilesExist();
@@ -108,6 +164,28 @@ public class JsonDatabaseManager {
             }
 
             array.put(obj);
+            
+            if (u instanceof Student s) {
+            obj.put("enrolledCourseIds", new JSONArray(s.getEnrolledCourdseIds()));
+            obj.put("completedLessonIds", new JSONArray(s.getCompletedLesssonIds()));
+
+        // quiz attempts
+        JSONArray attemptsArr = new JSONArray();
+            for (Map.Entry<String, List<QuizAttempt>> e : s.getQuizAttemptsByLesson().entrySet()) {
+                for (QuizAttempt a : e.getValue()) {
+                    JSONObject at = new JSONObject();
+                    at.put("lessonId", e.getKey());
+                    at.put("timestamp", a.getTimestamp());
+                    at.put("score", a.getScore());
+                    at.put("correctCount", a.getCorrectCount());
+                    at.put("totalQuestions", a.getTotalQuestions());
+                    attemptsArr.put(at);
+        }
+    }
+    obj.put("quizAttempts", attemptsArr);
+}
+
+
         }
 
         try (PrintWriter pw = new PrintWriter(new FileWriter(USERS_FILE))) {
@@ -142,6 +220,7 @@ public class JsonDatabaseManager {
     }
 
     // ------------------ COURSES -------------------
+    
     public List<Course> loadCourses() {
         ensureDataFilesExist();
         List<Course> courses = new ArrayList<>();
@@ -189,6 +268,7 @@ public class JsonDatabaseManager {
         return courses;
     }
 
+    
     public void saveCourses(List<Course> courses) {
         ensureDataFilesExist();
         JSONArray array = new JSONArray();
@@ -222,6 +302,7 @@ public class JsonDatabaseManager {
         }
     }
 
+
     public Course getCourseById(String courseId) {
         for (Course c : loadCourses()) {
             if (c.getCourseId().equals(courseId)) return c;
@@ -245,4 +326,118 @@ public class JsonDatabaseManager {
         }
         saveCourses(courses);
     }
+
+    public List<Course> getVisibleCoursesForStudents() {
+    return loadCourses().stream()
+            .filter(c -> "APPROVED".equalsIgnoreCase(c.getStatus()))
+            .collect(Collectors.toList());
+}
+
+    // 2) Approve / Reject Course (admin actions)
+    public void approveCourse(String courseId) {
+        List<Course> courses = loadCourses();
+        for (Course c : courses) {
+            if (c.getCourseId().equals(courseId)) {
+                c.setStatus("APPROVED");
+                break;
+        }
+    }
+        saveCourses(courses);
+    }
+
+        public void rejectCourse(String courseId) {
+        List<Course> courses = loadCourses();
+            for (Course c : courses) {
+                if (c.getCourseId().equals(courseId)) {
+                c.setStatus("REJECTED");
+                break;
+            }
+        }
+        saveCourses(courses);
+    }
+
+// 4) computeCourseStatistics: return a simple Map<String, JSONObject> where key = lessonId,
+// value contains averageScore and completionPercentage
+    public Map<String, JSONObject> computeCourseStatistics(String courseId) {
+        Map<String, JSONObject> out = new LinkedHashMap<>();
+        List<Course> courses = loadCourses();
+        Course target = null;
+            for (Course c : courses) if (c.getCourseId().equals(courseId)) { target = c; break; }
+                if (target == null) return out;
+
+            List<String> lessonIds = target.getLessons().stream().map(Lesson::getLessonId).collect(Collectors.toList());
+            List<Student> allStudents = loadUsers().stream()
+            .filter(u -> u instanceof Student)
+            .map(u -> (Student) u)
+            .collect(Collectors.toList());
+
+            for (String lid : lessonIds) {
+            // gather all attempts scores for this lesson from all students
+            List<Integer> scores = new ArrayList<>();
+            int completedCount = 0;
+            for (Student s : allStudents) {
+            List<QuizAttempt> attempts = s.getAttemptsForCourseLesson(courseId, lid);
+            for (QuizAttempt a : attempts) scores.add(a.getScore());
+            if (s.hasCompletedLesson(lid)) completedCount++;
+        }
+        double avg = scores.isEmpty() ? 0.0 : scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+        double completionPct = allStudents.isEmpty() ? 0.0 : (completedCount * 100.0 / allStudents.size());
+
+        JSONObject stat = new JSONObject();
+        stat.put("lessonId", lid);
+        stat.put("averageScore", avg);
+        stat.put("completionPercentage", completionPct);
+        stat.put("attemptCount", scores.size());
+        out.put(lid, stat);
+        }
+
+        return out;
+    }
+    
+        public void recordQuizAttempt(int studentId, String lessonId, QuizAttempt attempt) {
+            List<User> users = loadUsers();
+            for (User u : users) {
+            if (u.getUserId() == studentId && u instanceof Student s) {
+            s.addQuizAttempt(lessonId, attempt);
+            saveUsers(users);
+            return;
+        }
+            }
+        throw new IllegalArgumentException("Student not found: " + studentId);
+        }
+
+        // Check if student passed lesson
+        public boolean hasStudentPassedLesson(int studentId, String lessonId, int passingPercentage) {
+            List<User> users = loadUsers();
+                for (User u : users) {
+                    if (u.getUserId() == studentId && u instanceof Student s) {
+                    return s.hasPassedLesson(lessonId, passingPercentage);
+            }
+        }
+        return false;
+        }
+        
+       public boolean isCourseCompleted(Student s, Course c) {
+            // All lessons must be completed
+            for (Lesson lesson : c.getLessons()) {
+                if (!s.hasCompletedLesson(lesson.getLessonId())) {
+                return false;
+            }
+        }
+        return true;
+        }
+       
+        public Certificate generateCertificate(Student s, Course c) {
+        String certId = UUID.randomUUID().toString();
+        String date = java.time.LocalDate.now().toString();
+
+        Certificate cert = new Certificate(certId, s.getUserId(), c.getCourseId(), date);
+        s.addCertificate(cert);
+
+       updateUser(s); // save to users.json
+
+       return cert;
+       }
+
+
 }
