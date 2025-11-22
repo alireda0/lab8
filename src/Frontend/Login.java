@@ -5,14 +5,10 @@
 package Frontend;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import models.User;
+
 import models.Student;
 import models.Instructor;
-import jsondatabase.JsonDatabaseManager;
+
 
 public class Login extends javax.swing.JFrame {
 
@@ -20,9 +16,10 @@ public class Login extends javax.swing.JFrame {
      * Creates new form login
      */
     public Login() {
+        
+        initComponents();
         setLocationRelativeTo(null);
         setTitle("Login");
-        initComponents();
     }
 
     /**
@@ -198,11 +195,7 @@ if (!found.getPasswordHash().equals(hashedInput)) {
         JOptionPane.showMessageDialog(this, "Welcome " + found.getUsername(), "Login Successful", JOptionPane.INFORMATION_MESSAGE);
 
         // ----------- OPEN DASHBOARDS -----------
-        if (selectedRole.equalsIgnoreCase("STUDENT")) {
-            new Frontend.StudentDashboard((Student)found).setVisible(true);
-        } else if (selectedRole.equalsIgnoreCase("INSTRUCTOR")) {
-            new Frontend.InstructorDashboard((Instructor)found).setVisible(true);
-        }
+
 
         this.dispose(); // close login frame
 

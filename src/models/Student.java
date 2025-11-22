@@ -5,8 +5,6 @@ import org.json.JSONTokener;
 public class Student extends User{
     private List<String> enrolledCourseIds;
     private List<String> completedLessonIds;
-    private Map<String, List<QuizAttempt>> quizAttemptsByLesson; // key = lessonId
-    private List<Certificate> certificates = new ArrayList<>();
 
     
    public Student(List<String> enrolledCourseIds,
