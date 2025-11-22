@@ -20,10 +20,22 @@
     {
         "role": "STUDENT",
         "userId": 357,
-        "enrolledCourseIds": [],
+        "enrolledCourseIds": [
+            "C001",
+            "C002"
+        ],
         "completedLessonIds": [],
         "email": "reda@gmail.com",
         "passwordHash": "8a4665c1246937c22afaff4c257532f076e5735b3a9f778da393b7a17d438847",
         "username": "reda"
+    },
+    {
+        "role": "STUDENT",
+        "userId": 4,
+        "enrolledCourseIds": [],
+        "completedLessonIds": [],
+        "email": "charlie@example.com",
+        "passwordHash": "89e01536ac207279409d4de1e5253e01f4a1769e696db0d6062ca9b8f56767c8",
+        "username": "Charlie"
     }
 ]

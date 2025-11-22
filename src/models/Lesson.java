@@ -8,7 +8,7 @@ public class Lesson {
     private String title;
     private String content;
     private List<String> resources;  // Optional (URLs, file paths, etc.)
-
+    
     // ----------------- Constructors -----------------
 
     public Lesson() {}

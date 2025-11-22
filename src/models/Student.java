@@ -9,6 +9,7 @@ import java.util.List;
 public class Student extends User{
     private List<String> enrolledCourseIds;
     private List<String> completedLessonIds;
+    
 
     public Student(List<String> enrolledCourseIds, List<String> completedLessonIds,
                int userId, String username, String email,

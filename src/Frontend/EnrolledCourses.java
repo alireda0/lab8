@@ -17,22 +17,24 @@ import java.util.List;
 public class EnrolledCourses extends javax.swing.JFrame {
 
     private Student loggedStudent;
-    private JTable tableEnrolled;
+    
     private DefaultTableModel tableModel;
     private JsonDatabaseManager db = new JsonDatabaseManager();
     public EnrolledCourses() {
-        
+        this(null);
     }
     public EnrolledCourses(Student student) {
-        this.loggedStudent = student;
+         this.loggedStudent = student;
 
-        setTitle("Enrolled Courses");
-        setSize(850, 450);
+    initComponents();  
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    // Attach the model after UI is created
+    tableModel = new DefaultTableModel(
+            new String[]{"Course ID", "Title", "Instructor", "Progress"}, 0
+    );
+    jTable1.setModel(tableModel);
 
-        initComponents();
-        loadEnrolledCourses();  // Load data into table
+    loadEnrolledCourses();  
     }
      private void loadEnrolledCourses() {
         tableModel.setRowCount(0); // Clear old rows
@@ -109,6 +111,11 @@ public class EnrolledCourses extends javax.swing.JFrame {
         });
 
         jButton2.setText("Back");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -150,7 +157,7 @@ public class EnrolledCourses extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-       int row = tableEnrolled.getSelectedRow();
+       int row = jTable1.getSelectedRow();
 
         if (row == -1) {
             JOptionPane.showMessageDialog(this,
@@ -172,10 +179,15 @@ public class EnrolledCourses extends javax.swing.JFrame {
         }
 
         // Open lessons window
-        //new Lessons(loggedStudent, course).setVisible(true);
+        new Lessons(loggedStudent, course).setVisible(true);
         this.dispose();
     
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+         new StudentDashboard(loggedStudent).setVisible(true);
+         this.dispose();        
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments

@@ -5,14 +5,10 @@
 package Frontend;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import models.User;
+
 import models.Student;
 import models.Instructor;
-import jsondatabase.JsonDatabaseManager;
+
 
 public class Login extends javax.swing.JFrame {
 
@@ -20,9 +16,10 @@ public class Login extends javax.swing.JFrame {
      * Creates new form login
      */
     public Login() {
+        
+        initComponents();
         setLocationRelativeTo(null);
         setTitle("Login");
-        initComponents();
     }
 
     /**
@@ -198,11 +195,14 @@ if (!found.getPasswordHash().equals(hashedInput)) {
         JOptionPane.showMessageDialog(this, "Welcome " + found.getUsername(), "Login Successful", JOptionPane.INFORMATION_MESSAGE);
 
         // ----------- OPEN DASHBOARDS -----------
-        if (selectedRole.equalsIgnoreCase("STUDENT")) {
-            new Frontend.StudentDashboard().setVisible(true);
-        } else if (selectedRole.equalsIgnoreCase("INSTRUCTOR")) {
-            new Frontend.InstructorDashboard().setVisible(true);
-        }
+        // ----------- OPEN DASHBOARDS -----------
+if (selectedRole.equalsIgnoreCase("STUDENT")) {
+    Student student = (Student) found;  // Cast the found user to Student
+    new Frontend.StudentDashboard(student).setVisible(true);  // Pass it!
+} else if (selectedRole.equalsIgnoreCase("INSTRUCTOR")) {
+    Instructor instructor = (Instructor) found;  // Cast to Instructor
+    //new Frontend.InstructorDashboard(instructor).setVisible(true);  // Pass it if needed
+}
 
         this.dispose(); // close login frame
 
