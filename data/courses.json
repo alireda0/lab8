@@ -6,11 +6,23 @@
         "courseId": "1",
         "instructorId": "1",
         "status": "PENDING",
-        "lessons": [{
-            "lessonId": "1",
-            "title": "Arrays",
-            "content": "Introduction to arrays"
-        }]
+        "lessons": [
+            {
+                "lessonId": "1",
+                "title": "Arrays",
+                "content": "Introduction to arrays"
+            },
+            {
+                "lessonId": "2",
+                "title": "Stacks",
+                "content": "default"
+            },
+            {
+                "lessonId": "3",
+                "title": "queues",
+                "content": "default"
+            }
+        ]
     },
     {
         "description": "Deep dive into Lists, Sets, Maps, and Trees.",
@@ -33,5 +45,35 @@
         "instructorId": "102",
         "status": "PENDING",
         "lessons": []
+    },
+    {
+        "description": "learn functions and matrices",
+        "students": [],
+        "title": "maths 1",
+        "courseId": "C1000",
+        "instructorId": "1",
+        "status": "PENDING",
+        "lessons": [
+            {
+                "lessonId": "L1",
+                "title": "normal functions",
+                "content": "Default content"
+            },
+            {
+                "lessonId": "L2",
+                "title": "inverse functions",
+                "content": "Default content"
+            },
+            {
+                "lessonId": "L3",
+                "title": "gauss elemination",
+                "content": "Default content"
+            },
+            {
+                "lessonId": "L4",
+                "title": "determinant",
+                "content": "default"
+            }
+        ]
     }
 ]

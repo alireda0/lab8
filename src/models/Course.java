@@ -30,6 +30,16 @@ public class Course {
         this.students = new ArrayList<>();
     }
 
+    public Course(String courseId, String title, String description, String instructorId) {
+        this.courseId = courseId;
+        this.title = title;
+        this.description = description;
+        this.instructorId = instructorId;
+        this.lessons = new ArrayList<>(); 
+        this.students = new ArrayList<>();
+    }
+    
+
     // -------------------- Getters --------------------
 
     public String getCourseId() {
