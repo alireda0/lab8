@@ -4,19 +4,64 @@
  */
 package Frontend;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JOptionPane;
+
+import javax.swing.table.DefaultTableModel;
+import models.Course;
+import models.Lesson;
+import models.Student;
+
 /**
  *
  * @author SHIKO
  */
 public class Lessons extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Lessons
-     */
+    private Student loggedStudent;
+    private Course course;
+    private List<String> viewedLessons = new ArrayList<>();
     public Lessons() {
-        initComponents();
+        
     }
+    public Lessons(Student student, Course course) {
+        this.loggedStudent = student;
+        this.course = course;
+        
+        initComponents();  // NetBeans generated method
+        
+        // Set the course title to the label
+        lblCourseTitle.setText(course.getTitle());
+        lblCourseTitle.setFont(new java.awt.Font("Tempus Sans ITC", 1, 14));
 
+        
+        setLocationRelativeTo(null);  // Center the frame
+        setTitle("Course Lessons");    // Window title
+        
+        loadLessons();  // Load lessons into table
+    }
+     private void loadLessons() {
+        // Your code to populate the lessons table
+        List<Lesson> lessons = course.getLessons();
+        
+        // Create table model and populate
+        DefaultTableModel model = (DefaultTableModel) tableLessons.getModel();
+        model.setRowCount(0);  // Clear existing rows
+        
+        for (Lesson lesson : lessons) {
+            String status = loggedStudent.getCompletedLesssonIds().contains(lesson.getLessonId()) 
+                            ? "Completed" : "Not Started";
+            
+            model.addRow(new Object[] {
+                lesson.getLessonId(),
+                lesson.getTitle(),
+                status,
+                "Not Taken"  // Quiz status (for Lab 8)
+            });
+        }}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -28,14 +73,18 @@ public class Lessons extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tableLessons = new javax.swing.JTable();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        lblCourseTitle = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setFont(new java.awt.Font("Tempus Sans ITC", 1, 24)); // NOI18N
-        jLabel1.setText("Lessons");
+        jLabel1.setText("Lessons of");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tableLessons.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -43,10 +92,34 @@ public class Lessons extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Lesson ID", "Title 2", "Title 3", "Title 4"
+                "Lesson ID", "Title ", "Status", "Quiz Status"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tableLessons);
+
+        jButton1.setText("Back");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("Take Quiz");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jButton3.setText("View Content");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        lblCourseTitle.setFont(new java.awt.Font("Tempus Sans ITC", 1, 14)); // NOI18N
+        lblCourseTitle.setText("Course Title");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -54,30 +127,135 @@ public class Lessons extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(148, 148, 148)
-                        .addComponent(jLabel1))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 554, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 375, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblCourseTitle)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jButton1)
+                                .addGap(146, 146, 146)
+                                .addComponent(jButton3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton2)))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(lblCourseTitle))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(92, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton3)
+                    .addComponent(jButton2))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+
+    System.out.println("View Content button clicked!"); // Debug
+    
+    int selectedRow = tableLessons.getSelectedRow();
+    System.out.println("Selected row: " + selectedRow); // Debug
+    
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Please select a lesson first!", 
+                                      "No Selection", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    // Get lesson details from table
+    String lessonId = tableLessons.getValueAt(selectedRow, 0).toString();
+    String lessonTitle = tableLessons.getValueAt(selectedRow, 1).toString();
+    
+    System.out.println("Lesson ID: " + lessonId); // Debug
+    System.out.println("Lesson Title: " + lessonTitle); // Debug
+    
+    // Find the full lesson object
+    Lesson selectedLesson = null;
+    for (Lesson l : course.getLessons()) {
+        if (l.getLessonId().equals(lessonId)) {
+            selectedLesson = l;
+            break;
+        }
+    }
+    
+    if (selectedLesson == null) {
+        System.out.println("ERROR: Selected lesson is null!"); // Debug
+        JOptionPane.showMessageDialog(this, "Error: Lesson not found!", 
+                                      "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    
+    System.out.println("Opening LessonContent window..."); // Debug
+    System.out.println("Lesson content: " + selectedLesson.getContent()); // Debug
+    
+    // Open content viewer
+    new LessonContent(loggedStudent, course, selectedLesson).setVisible(true);
+    this.dispose();
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        int selectedRow = tableLessons.getSelectedRow();
+    
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Please select a lesson first!", 
+                                      "No Selection", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    String lessonId = tableLessons.getValueAt(selectedRow, 0).toString();
+    
+    // Check if content was viewed (you'll track this)
+    if (!hasViewedContent(lessonId)) {
+        JOptionPane.showMessageDialog(this, "Please view the lesson content first!", 
+                                      "Content Not Viewed", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    // Find the lesson
+    Lesson selectedLesson = null;
+    for (Lesson l : course.getLessons()) {
+        if (l.getLessonId().equals(lessonId)) {
+            selectedLesson = l;
+            break;
+        }
+    }
+    
+    // Open quiz frame (Lab 8)
+    //new QuizFrame(loggedStudent, course, selectedLesson).setVisible(true);
+    this.dispose();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+         new EnrolledCourses(loggedStudent).setVisible(true);
+         this.dispose();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+      // Helper method to check if content was viewed
+private boolean hasViewedContent(String lessonId) {
+    return viewedLessons.contains(lessonId);
+}
+
+// Method to mark lesson as viewed
+public void markLessonViewed(String lessonId) {
+    if (!viewedLessons.contains(lessonId)) {
+        viewedLessons.add(lessonId);
+    }
+}
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -110,9 +288,15 @@ public class Lessons extends javax.swing.JFrame {
         });
     }
 
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JLabel lblCourseTitle;
+    private javax.swing.JTable tableLessons;
     // End of variables declaration//GEN-END:variables
 }
