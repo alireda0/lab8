@@ -47,8 +47,6 @@ public class AddCourse extends javax.swing.JFrame {
         txtTitle = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         txtDescription = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        txtLessons = new javax.swing.JTextField();
         addCourse = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -74,15 +72,6 @@ public class AddCourse extends javax.swing.JFrame {
             }
         });
 
-        jLabel4.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        jLabel4.setText("Lessons");
-
-        txtLessons.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtLessonsActionPerformed(evt);
-            }
-        });
-
         addCourse.setText("Add Course");
         addCourse.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -103,15 +92,13 @@ public class AddCourse extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(73, 73, 73)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtID, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
                     .addComponent(txtTitle)
-                    .addComponent(txtDescription)
-                    .addComponent(txtLessons))
+                    .addComponent(txtDescription))
                 .addContainerGap(85, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
@@ -121,23 +108,19 @@ public class AddCourse extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(30, 30, 30)
+                .addGap(41, 41, 41)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(txtID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(26, 26, 26)
+                    .addComponent(txtID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtTitle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(28, 28, 28)
+                .addGap(38, 38, 38)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(29, 29, 29)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel4)
-                    .addComponent(txtLessons, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 64, Short.MAX_VALUE)
                 .addComponent(addCourse)
                 .addGap(34, 34, 34))
         );
@@ -154,7 +137,7 @@ public class AddCourse extends javax.swing.JFrame {
             String cID = txtID.getText().trim();
             String cTitle = txtTitle.getText().trim();
             String cDescription = txtDescription.getText().trim();
-            String cLessonsRaw = txtLessons.getText().trim();
+           
 
             // --- VALIDATION ---
             if (cID.isEmpty()) {
@@ -171,10 +154,8 @@ public class AddCourse extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Please enter course description.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            if (cLessonsRaw.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please add at least 1 lesson.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+           
+            
 
             String instructorIdStr = String.valueOf(loggedInstructor.getUserId());
 
@@ -182,18 +163,7 @@ public class AddCourse extends javax.swing.JFrame {
             Course newCourse = new Course(cID, cTitle, cDescription, instructorIdStr,"PENDING");
 
             // 2. Process Lessons (Split by comma)
-            String[] lessonTitles = cLessonsRaw.split(",");
-            int lessonCounter = 1;
-            
-            for (String title : lessonTitles) {
-                // Ensure Lesson class has a constructor or setters ready
-                models.Lesson l = new models.Lesson(); 
-                l.setLessonId("L" + lessonCounter++); 
-                l.setTitle(title.trim());
-                l.setContent("Default content"); 
-                // Ensure 'newCourse.lessons' is not null (See Fix 1 above)
-                newCourse.addLesson(l);
-            }
+           
 
             // 3. Save to Database
             JsonDatabaseManager db = new JsonDatabaseManager();
@@ -219,10 +189,6 @@ public class AddCourse extends javax.swing.JFrame {
     private void txtIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIDActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtIDActionPerformed
-
-    private void txtLessonsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtLessonsActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtLessonsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -264,10 +230,8 @@ public class AddCourse extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JTextField txtDescription;
     private javax.swing.JTextField txtID;
-    private javax.swing.JTextField txtLessons;
     private javax.swing.JTextField txtTitle;
     // End of variables declaration//GEN-END:variables
 }

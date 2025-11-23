@@ -26,7 +26,7 @@ public class Lessons extends javax.swing.JFrame {
     private Course course;
     private List<String> viewedLessons = new ArrayList<>();
     public Lessons() {
-        
+        initComponents();
     }
     public Lessons(Student student, Course course) {
         this.loggedStudent = student;
@@ -45,24 +45,60 @@ public class Lessons extends javax.swing.JFrame {
         loadLessons();  // Load lessons into table
     }
      private void loadLessons() {
-        // Your code to populate the lessons table
+        // 1. Refresh Student Data (Critical to see new attempts immediately)
+        // We reload the student from DB to ensure we have the latest attempts
+        jsondatabase.JsonDatabaseManager db = new jsondatabase.JsonDatabaseManager();
+        models.User freshUser = db.getCourseById(course.getCourseId()) != null ? 
+                                db.loadUsers().stream().filter(u -> u.getUserId() == loggedStudent.getUserId()).findFirst().orElse(loggedStudent) 
+                                : loggedStudent;
+        
+        if (freshUser instanceof Student) {
+            this.loggedStudent = (Student) freshUser;
+        }
+
+        // 2. Setup Table
+        DefaultTableModel model = (DefaultTableModel) tableLessons.getModel();
+        model.setRowCount(0); 
+        
         List<Lesson> lessons = course.getLessons();
         
-        // Create table model and populate
-        DefaultTableModel model = (DefaultTableModel) tableLessons.getModel();
-        model.setRowCount(0);  // Clear existing rows
-        
         for (Lesson lesson : lessons) {
+            // Lesson Completion Status
             String status = loggedStudent.getCompletedLesssonIds().contains(lesson.getLessonId()) 
-                            ? "Completed" : "Not Started";
+                            ? "Completed" : "In Progress";
+            
+            // Quiz Status Logic
+            String quizStatus = "No Quiz";
+            if (lesson.getQuiz() != null && lesson.getQuiz().totalQuestions() > 0) {
+                List<models.QuizAttempt> attempts = loggedStudent.getAttemptsForLesson(lesson.getLessonId());
+                
+                if (attempts == null || attempts.isEmpty()) {
+                    quizStatus = "Not Taken";
+                } else {
+                    // Check if passed
+                    boolean passed = false;
+                    int highestScore = 0;
+                    for (models.QuizAttempt qa : attempts) {
+                        if (qa.getScore() > highestScore) highestScore = qa.getScore();
+                        if (qa.getScore() >= lesson.getQuiz().getPassingPercentage()) passed = true;
+                    }
+                    
+                    if (passed) {
+                        quizStatus = "Passed (" + highestScore + "%)";
+                    } else {
+                        quizStatus = "Failed (" + highestScore + "%)";
+                    }
+                }
+            }
             
             model.addRow(new Object[] {
                 lesson.getLessonId(),
                 lesson.getTitle(),
                 status,
-                "Not Taken"  // Quiz status (for Lab 8)
+                quizStatus
             });
-        }}
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -271,10 +307,14 @@ public class Lessons extends javax.swing.JFrame {
             JOptionPane.INFORMATION_MESSAGE);
         return;
     }
-    
-    // ===== Quiz exists - open QuizPage =====
-    new QuizPage(loggedStudent, course, selectedLesson).setVisible(true);
-    this.dispose();
+    QuizPage quizPage = new QuizPage(loggedStudent, course, selectedLesson);
+    quizPage.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+            loadLessons(); // REFRESH TABLE when quiz is done
+        }
+    });
+    quizPage.setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed

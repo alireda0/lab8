@@ -10,6 +10,7 @@ import models.*;
 import jsondatabase.JsonDatabaseManager;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.List;
 /**
  *
@@ -22,11 +23,13 @@ public class QuizPage extends javax.swing.JFrame {
     private Quiz quiz;
     private int currentIndex = 0;
     private int correctCount = 0;
+    private JsonDatabaseManager db = new JsonDatabaseManager(); 
+    private int[] userAnswers;
     /**
      * Creates new form Quiz
      */
     public QuizPage() {
-        this(null,null,null);
+        initComponents();
     }
      public QuizPage(Student student,Course course, Lesson lesson) {
         this.student = student;
@@ -38,11 +41,26 @@ public class QuizPage extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        if (this.quiz != null) {
+            this.userAnswers = new int[quiz.totalQuestions()];
+            for (int i = 0; i < userAnswers.length; i++) {
+                userAnswers[i] = -1; 
+            }}
 
         initComponents();
         loadQuestion(0);
 
         setVisible(true);
+    }
+     private void saveCurrentAnswer() {
+        int selected = -1;
+        if (optA.isSelected()) selected = 0;
+        else if (optB.isSelected()) selected = 1;
+        else if (optC.isSelected()) selected = 2;
+        else if (optD.isSelected()) selected = 3;
+
+        // Save selection to the array
+        userAnswers[currentIndex] = selected;
     }
     
     /**
@@ -184,18 +202,12 @@ public class QuizPage extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
-       checkAnswer();  
+       saveCurrentAnswer(); // Save before moving!
 
-    currentIndex++;
-
-    if (currentIndex < quiz.totalQuestions()) {
-        loadQuestion(currentIndex);
-    }
-
-    // Enable submit on last question
-    if (currentIndex == quiz.totalQuestions() - 1) {
-        btnSubmit.setEnabled(true);
-    }
+       currentIndex++;
+       if (currentIndex < quiz.totalQuestions()) {
+           loadQuestion(currentIndex);
+       }
     }//GEN-LAST:event_btnNextActionPerformed
 private void checkAnswer() {
     int correctIndex = quiz.getQuestions()
@@ -214,43 +226,53 @@ private void checkAnswer() {
     }
 }
     private void btnSubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubmitActionPerformed
-         checkAnswer(); // last question
+       saveCurrentAnswer(); // Save the very last answer
 
-    int total = quiz.totalQuestions();
-    int score = (correctCount * 100) / total;
+        int correctCount = 0;
+        int total = quiz.totalQuestions();
 
-    JOptionPane.showMessageDialog(this,
-        "Quiz Completed!\nCorrect: " + correctCount + "/" + total +
-        "\nScore: " + score + "%",
-        "Quiz Result",
-        JOptionPane.INFORMATION_MESSAGE
-    );
+        // Calculate Score using userAnswers array
+        for (int i = 0; i < total; i++) {
+            int correctIndex = quiz.getQuestions().get(i).getCorrectOptionIndex();
+            if (userAnswers[i] == correctIndex) {
+                correctCount++;
+            }
+        }
 
-    // ----- Save Quiz Attempt -----
-    QuizAttempt attempt = new QuizAttempt(
-            lesson.getLessonId(),
-            System.currentTimeMillis(),
-            score,
-            correctCount,
-            total
-    );
+        int score = (total > 0) ? (correctCount * 100) / total : 0;
+        int passingScore = quiz.getPassingPercentage();
 
-    JsonDatabaseManager db = new JsonDatabaseManager();
-    db.recordQuizAttempt(student.getUserId(), lesson.getLessonId(), attempt);
+        // Create Attempt Object
+        QuizAttempt attempt = new QuizAttempt(
+                lesson.getLessonId(),
+                System.currentTimeMillis(),
+                score,
+                correctCount,
+                total
+        );
 
-    // ----- Check Passing -----
-    if (score >= quiz.getPassingPercentage()) {
+        try {
+            // Save to DB
+            db.recordQuizAttempt(student.getUserId(), lesson.getLessonId(), attempt, passingScore);
+            
+            // Update Local Memory
+            student.addQuizAttempt(lesson.getLessonId(), attempt);
 
-        student.markLessonCompleted(lesson.getLessonId());
-        db.updateUser(student);
+            String message = "Score: " + score + "%\n";
+            if (score >= passingScore) {
+                message += "Congratulations! You Passed.";
+                student.markLessonCompleted(lesson.getLessonId());
+            } else {
+                message += "You Failed. Minimum required: " + passingScore + "%";
+            }
 
-        JOptionPane.showMessageDialog(this,
-                "Congratulations! You passed this lesson.",
-                "Success",
-                JOptionPane.INFORMATION_MESSAGE);
-    }
-    
-    this.dispose();
+            JOptionPane.showMessageDialog(this, message, "Quiz Result", JOptionPane.INFORMATION_MESSAGE);
+            this.dispose();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error saving result: " + e.getMessage());
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_btnSubmitActionPerformed
 
     private void optAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optAActionPerformed
@@ -269,30 +291,28 @@ private void checkAnswer() {
         optionSelectedActionPerformed(evt);
     }//GEN-LAST:event_optDActionPerformed
 private void loadQuestion(int index) {
+        Question q = quiz.getQuestions().get(index);
 
-    Question q = quiz.getQuestions().get(index);
+        // 1. Set Text
+        txtQuestion.setText("Q" + (index + 1) + ") " + q.getQuestionText());
+        optA.setText(q.getOptions().size() > 0 ? q.getOptions().get(0) : "");
+        optB.setText(q.getOptions().size() > 1 ? q.getOptions().get(1) : "");
+        optC.setText(q.getOptions().size() > 2 ? q.getOptions().get(2) : "");
+        optD.setText(q.getOptions().size() > 3 ? q.getOptions().get(3) : "");
 
-    // ---- PRINT IN TEXT AREA ----
-    txtQuestion.setText(
-        "Q" + (index + 1) + ") " + q.getQuestionText() + "\n\n" +
-        "A) " + q.getOptions().get(0) + "\n" +
-        "B) " + q.getOptions().get(1) + "\n" +
-        "C) " + q.getOptions().get(2) + "\n" +
-        "D) " + q.getOptions().get(3)
-    );
+        // 2. Restore Previous Selection
+        buttonGroup1.clearSelection(); // Clear first
+        int savedAnswer = userAnswers[index];
+        
+        if (savedAnswer == 0) optA.setSelected(true);
+        else if (savedAnswer == 1) optB.setSelected(true);
+        else if (savedAnswer == 2) optC.setSelected(true);
+        else if (savedAnswer == 3) optD.setSelected(true);
 
-    // ---- SET RADIO BUTTON LABELS ----
-    optA.setText("A) " + q.getOptions().get(0));
-    optB.setText("B) " + q.getOptions().get(1));
-    optC.setText("C) " + q.getOptions().get(2));
-    optD.setText("D) " + q.getOptions().get(3));
-
-    // ---- RESET SELECTION ----
-    buttonGroup1.clearSelection();
-
-    btnNext.setEnabled(false);
-    btnSubmit.setEnabled(false);
-}
+        // 3. Enable/Disable Buttons
+        btnNext.setEnabled(index < quiz.totalQuestions() - 1);
+        btnSubmit.setEnabled(index == quiz.totalQuestions() - 1);
+    }
     /**
      * @param args the command line arguments
      */

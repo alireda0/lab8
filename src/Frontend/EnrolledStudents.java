@@ -38,49 +38,61 @@ public class EnrolledStudents extends javax.swing.JFrame {
         loadStudents();
     }
     private void loadStudents() {
-        // 1. Initialize the Table Model FIRST
-        String[] colNames = {"Name", "ID", "Email"};
-        tableModel = new DefaultTableModel(colNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Make read-only
-            }
-        };
+    // 1. Initialize the Table Model FIRST
+    String[] colNames = {"Name", "ID", "Email"};
+    tableModel = new DefaultTableModel(colNames, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false; // Make read-only
+        }
+    };
 
-        // 2. Safety Check
-        if (course == null) return;
+    // 2. Safety Check
+    if (course == null) return;
 
-        // 3. Get Student IDs
-        java.util.List<String> studentIds = course.getStudents();
-        
-        if (studentIds != null && !studentIds.isEmpty()) {
-            // Load users to find matches
-            java.util.List<User> allUsers = db.loadUsers();
+    // 3. Get Student IDs
+    java.util.List<String> studentIds = course.getStudents();
 
-            for (String idStr : studentIds) {
-                try {
-                    int studentId = Integer.parseInt(idStr);
-                    
-                    // Find the user object
-                    for (User u : allUsers) {
-                        if (u.getUserId() == studentId) {
-                            tableModel.addRow(new Object[]{
-                                u.getUsername(), 
-                                u.getUserId(), 
-                                u.getEmail()
-                            });
-                            break; 
-                        }
-                    }
-                } catch (NumberFormatException e) {
-                    System.out.println("Skipping invalid ID: " + idStr);
+    // 🔹 Set to avoid duplicates
+    java.util.Set<Integer> seenIds = new java.util.HashSet<>();
+
+    if (studentIds != null && !studentIds.isEmpty()) {
+        // Load users to find matches
+        java.util.List<User> allUsers = db.loadUsers();
+
+        for (String idStr : studentIds) {
+            try {
+                int studentId = Integer.parseInt(idStr);
+
+                // ✅ Skip if already added
+                if (seenIds.contains(studentId)) {
+                    continue;
                 }
+
+                // Find the user object
+                for (User u : allUsers) {
+                    if (u.getUserId() == studentId) {
+                        tableModel.addRow(new Object[]{
+                                u.getUsername(),
+                                u.getUserId(),
+                                u.getEmail()
+                        });
+
+                        // mark as seen so we don't add again
+                        seenIds.add(studentId);
+                        break;
+                    }
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Skipping invalid ID: " + idStr);
             }
         }
-        
-        // 4. Link the model to the table (NetBeans name is jTable1)
-        jTable1.setModel(tableModel);
     }
+
+    // 4. Link the model to the table (NetBeans name is jTable1)
+    jTable1.setModel(tableModel);
+}
+
 
     /**
      * This method is called from within the constructor to initialize the form.

@@ -17,6 +17,7 @@ import jsondatabase.JsonDatabaseManager;
 public class AddLesson extends javax.swing.JFrame {
     private Course course;
     private JsonDatabaseManager db = new JsonDatabaseManager();
+    private Lesson tempLesson= new Lesson();
 
     /**
      * Creates new form AddLesson
@@ -30,6 +31,7 @@ public class AddLesson extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Close only this window
         setTitle("Adding Lesson");
+        save.setEnabled(false);
     }
 
     /**
@@ -48,6 +50,7 @@ public class AddLesson extends javax.swing.JFrame {
         content = new javax.swing.JLabel();
         txtContent = new javax.swing.JTextField();
         save = new javax.swing.JButton();
+        creatQuiz = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -68,26 +71,36 @@ public class AddLesson extends javax.swing.JFrame {
             }
         });
 
+        creatQuiz.setText("Create Quiz");
+        creatQuiz.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                creatQuizActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(24, 24, 24)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(content, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(73, 73, 73)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtLessonId)
-                    .addComponent(txtLessonTitle)
-                    .addComponent(txtContent, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE))
-                .addContainerGap(57, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(save, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(creatQuiz, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(save, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(34, 34, 34))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(content, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(73, 73, 73)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtLessonId)
+                            .addComponent(txtLessonTitle)
+                            .addComponent(txtContent, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE))
+                        .addContainerGap(57, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -104,8 +117,10 @@ public class AddLesson extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(content, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtContent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
-                .addComponent(save)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(save)
+                    .addComponent(creatQuiz, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(32, 32, 32))
         );
 
@@ -114,54 +129,78 @@ public class AddLesson extends javax.swing.JFrame {
 
     private void saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveActionPerformed
         try {
-            // 1. Get Inputs
             String lId = txtLessonId.getText().trim();
             String lTitle = txtLessonTitle.getText().trim();
             String lContent = txtContent.getText().trim();
 
-            // 2. Validation
-            if (lId.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter Lesson ID.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            if (lTitle.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter Lesson Title.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            if (lContent.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter Lesson Content.", "Error", JOptionPane.ERROR_MESSAGE);
+            // Basic Validation
+            if (lId.isEmpty() || lTitle.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in Lesson ID and Title.");
                 return;
             }
 
-            // 3. Check for duplicate Lesson ID within this course
+            // Extra Safety Check: Ensure Quiz Exists (Though button should be disabled anyway)
+            if (tempLesson.getQuiz() == null || tempLesson.getQuiz().getQuestions().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "You must create a quiz with at least 1 question!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Check Duplicate ID
             for (Lesson l : course.getLessons()) {
                 if (l.getLessonId().equals(lId)) {
-                    JOptionPane.showMessageDialog(this, "Lesson ID '" + lId + "' already exists in this course.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Lesson ID '" + lId + "' already exists.");
                     return;
                 }
             }
 
-            // 4. Create and Add Lesson
-            Lesson newLesson = new Lesson();
-            newLesson.setLessonId(lId);
-            newLesson.setTitle(lTitle);
-            newLesson.setContent(lContent);
+            // Finalize the Lesson Object
+            tempLesson.setLessonId(lId);
+            tempLesson.setTitle(lTitle);
+            tempLesson.setContent(lContent);
             
-            course.addLesson(newLesson);
-
-            // 5. Save to Database
-            // We must update the COURSE because lessons are stored inside the course object
+            // Add to Course and Save
+            course.addLesson(tempLesson);
             db.updateCourse(course);
 
-            // 6. Success
-            JOptionPane.showMessageDialog(this, "Lesson Added Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            this.dispose(); // Close this window
+            JOptionPane.showMessageDialog(this, "Lesson and Quiz Saved Successfully!");
+            this.dispose(); 
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error saving lesson: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
             ex.printStackTrace();
         }
     }//GEN-LAST:event_saveActionPerformed
+
+    private void creatQuizActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_creatQuizActionPerformed
+       String title = txtLessonTitle.getText().trim();
+        if (title.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a Lesson Title first.");
+            return;
+        }
+        tempLesson.setTitle(title);
+        
+        // Open Quiz Editor
+        QuizEditor quizWindow = new QuizEditor(tempLesson, course);
+        
+        // Add Listener to Enable Save Button ONLY if questions were added
+        quizWindow.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                // Check if quiz has questions
+                if (tempLesson.getQuiz() != null && !tempLesson.getQuiz().getQuestions().isEmpty()) {
+                    save.setEnabled(true); // Enable the Save button
+                    save.setToolTipText("Ready to save");
+                    JOptionPane.showMessageDialog(AddLesson.this, "Quiz confirmed! You can now save the lesson.");
+                } else {
+                    save.setEnabled(false); // Keep disabled if they opened editor but added nothing
+                    JOptionPane.showMessageDialog(AddLesson.this, "Quiz is empty. Please add at least one question.");
+                }
+            }
+        });
+        
+        quizWindow.setVisible(true);
+        
+    }//GEN-LAST:event_creatQuizActionPerformed
 
     /**
      * @param args the command line arguments
@@ -200,6 +239,7 @@ public class AddLesson extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel content;
+    private javax.swing.JButton creatQuiz;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JButton save;
