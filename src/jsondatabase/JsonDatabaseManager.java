@@ -1,7 +1,5 @@
 package jsondatabase;
 
-import models.Student;
-import models.Lesson;
 import models.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,145 +10,118 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * JsonDatabaseManager - simplified, robust loader/saver for users & courses (with quizzes & attempts)
+ */
 public class JsonDatabaseManager {
-
     private static final String DATA_FOLDER = "data";
     private static final String USERS_FILE = DATA_FOLDER + "/users.json";
     private static final String COURSES_FILE = DATA_FOLDER + "/courses.json";
 
-    // -------- Ensure folder and files exist --------
+    // Ensure data folder and files exist
     private void ensureDataFilesExist() {
         try {
             File folder = new File(DATA_FOLDER);
             if (!folder.exists()) folder.mkdirs();
 
-            File usersFile = new File(USERS_FILE); 
-            if (!usersFile.exists()) {
-                try (PrintWriter pw = new PrintWriter(new FileWriter(usersFile))) {
-                    pw.println("[]"); // empty JSON array
-                }
+            File usersFile = new File(USERS_FILE);
+            if (!usersFile.exists()) try (PrintWriter pw = new PrintWriter(new FileWriter(usersFile))) {
+                pw.println("[]");
             }
 
             File coursesFile = new File(COURSES_FILE);
-            if (!coursesFile.exists()) {
-                try (PrintWriter pw = new PrintWriter(new FileWriter(coursesFile))) {
-                    pw.println("[]"); // empty JSON array
-                }
+            if (!coursesFile.exists()) try (PrintWriter pw = new PrintWriter(new FileWriter(coursesFile))) {
+                pw.println("[]");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // ------------------ USERS -------------------
- public List<User> loadUsers() { 
-    ensureDataFilesExist();
-    List<User> users = new ArrayList<>();
+    // ----------------- USERS -----------------
+    public List<User> loadUsers() {
+        ensureDataFilesExist();
+        List<User> users = new ArrayList<>();
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(USERS_FILE)));
+            JSONArray arr = new JSONArray(content);
 
-    try {
-        String content = new String(Files.readAllBytes(Paths.get(USERS_FILE)));
-        JSONArray array = new JSONArray(content);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
 
-        for (int i = 0; i < array.length(); i++) {
+                String role = obj.optString("role", "STUDENT");
+                int userId = obj.optInt("userId", -1);
+                String username = obj.optString("username", "");
+                String email = obj.optString("email", "");
+                String passwordHash = obj.optString("passwordHash", "");
 
-            JSONObject obj = array.getJSONObject(i);
-            String role = obj.getString("role");
-            int userId = obj.getInt("userId");
-            String username = obj.getString("username");
-            String email = obj.getString("email");
-            String passwordHash = obj.getString("passwordHash");
+                if ("STUDENT".equalsIgnoreCase(role)) {
+                    // enrolled/completed
+                    List<String> enrolled = new ArrayList<>();
+                    List<String> completed = new ArrayList<>();
+                    JSONArray enrolledArr = obj.optJSONArray("enrolledCourseIds");
+                    JSONArray completedArr = obj.optJSONArray("completedLessonIds");
+                    if (enrolledArr != null) for (int j = 0; j < enrolledArr.length(); j++) enrolled.add(enrolledArr.optString(j));
+                    if (completedArr != null) for (int j = 0; j < completedArr.length(); j++) completed.add(completedArr.optString(j));
 
-            // ============================
-            // STUDENT
-            // ============================
-            if ("STUDENT".equals(role)) {
+                    // create student - note: constructor expects hashed password flag as last param in your code
+                    Student s = new Student(enrolled, completed, userId, username, email, passwordHash, role, true);
 
-                JSONArray enrolledArray = obj.optJSONArray("enrolledCourseIds");
-                JSONArray completedArray = obj.optJSONArray("completedLessonIds");
+                    // certificates
+                    JSONArray certsArr = obj.optJSONArray("certificates");
+                    if (certsArr != null) {
+                        for (int j = 0; j < certsArr.length(); j++) {
+                            JSONObject cObj = certsArr.optJSONObject(j);
+                            if (cObj == null) continue;
+                            Certificate cert = new Certificate(
+                                    cObj.optString("certificateId", UUID.randomUUID().toString()),
+                                    cObj.optInt("studentId", s.getUserId()),
+                                    cObj.optString("courseId", ""),
+                                    cObj.optString("issueDate", "")
+                            );
+                            s.getCertificates().add(cert);
+                        }
+                    }
 
-                List<String> enrolled = new ArrayList<>();
-                List<String> completed = new ArrayList<>();
+                    // quiz attempts
+                    JSONArray attemptsArr = obj.optJSONArray("quizAttempts");
+                    if (attemptsArr != null) {
+                        for (int j = 0; j < attemptsArr.length(); j++) {
+                            JSONObject at = attemptsArr.optJSONObject(j);
+                            if (at == null) continue;
+                            String lessonId = at.optString("lessonId", "");
+                            QuizAttempt qa = new QuizAttempt(
+                                    lessonId,
+                                    at.optLong("timestamp", System.currentTimeMillis()),
+                                    at.optInt("score", 0),
+                                    at.optInt("correctCount", 0),
+                                    at.optInt("totalQuestions", 0)
+                            );
+                            s.addQuizAttempt(lessonId, qa);
+                        }
+                    }
 
-                if (enrolledArray != null) {
-                    for (int j = 0; j < enrolledArray.length(); j++)
-                        enrolled.add(enrolledArray.getString(j));
+                    users.add(s);
+                } else if ("INSTRUCTOR".equalsIgnoreCase(role)) {
+                    Instructor ins = new Instructor(userId, username, email, passwordHash, true);
+                    users.add(ins);
+                } else if ("ADMIN".equalsIgnoreCase(role)) {
+                    Admin admin = new Admin(userId, username, email, passwordHash, true);
+                    users.add(admin);
+                } else {
+                    // Unknown role - create generic User? (skip)
                 }
-
-                if (completedArray != null) {
-                    for (int j = 0; j < completedArray.length(); j++)
-                        completed.add(completedArray.getString(j));
-                }
-
-                // NOTE: true => passwordHash is already hashed
-                Student s = new Student(
-                        new ArrayList<>(), 
-                        new ArrayList<>(),
-                        userId, username, email, passwordHash,
-                        role,
-                        true
-                );
-                
-                JSONArray certsArr = obj.optJSONArray("certificates");
-                if (certsArr != null) {
-                for (int j = 0; j < certsArr.length(); j++) {
-                JSONObject cObj = certsArr.getJSONObject(j);
-                Certificate cert = new Certificate(
-                cObj.getString("certificateId"),
-                cObj.getInt("studentId"),
-                cObj.getString("courseId"),
-                cObj.getString("issueDate")
-                );
-                s.getCertificates().add(cert);
-    }
-}
-
-                
-                s.getEnrolledCourseIds().addAll(enrolled);
-                s.getCompletedLessonIds().addAll(completed);
-
-                users.add(s);
             }
 
-            // ============================
-            // INSTRUCTOR
-            // ============================
-            else if ("INSTRUCTOR".equals(role)) {
-
-                Instructor ins = new Instructor(
-                        userId, username, email, passwordHash,
-                        true   // ← password already hashed
-                );
-
-                users.add(ins);
-            }
-
-            // ============================
-            // ADMIN
-            // ============================
-            else if ("ADMIN".equals(role)) {
-
-                Admin admin = new Admin(
-                        userId, username, email, passwordHash,
-                        true   // ← password already hashed
-                );
-
-                users.add(admin);
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-    } catch (IOException e) {
-        e.printStackTrace();
+        return users;
     }
-
-    return users;
-}
-
-
-
 
     public void saveUsers(List<User> users) {
         ensureDataFilesExist();
-        JSONArray array = new JSONArray();
+        JSONArray arr = new JSONArray();
 
         for (User u : users) {
             JSONObject obj = new JSONObject();
@@ -161,46 +132,54 @@ public class JsonDatabaseManager {
             obj.put("role", u.getRole());
 
             if (u instanceof Student s) {
-                obj.put("enrolledCourseIds", new JSONArray(s.getEnrolledCourdseIds()));
-                obj.put("completedLessonIds", new JSONArray(s.getCompletedLesssonIds()));
+                obj.put("enrolledCourseIds", new JSONArray(s.getEnrolledCourseIds()));
+                obj.put("completedLessonIds", new JSONArray(s.getCompletedLessonIds()));
+
+                // certificates
+                JSONArray certsArr = new JSONArray();
+                if (s.getCertificates() != null) {
+                    for (Certificate c : s.getCertificates()) {
+                        JSONObject co = new JSONObject();
+                        co.put("certificateId", c.getCertificateId());
+                        co.put("studentId", c.getStudentId());
+                        co.put("courseId", c.getCourseId());
+                        co.put("issueDate", c.getIssueDate());
+                        certsArr.put(co);
+                    }
+                }
+                obj.put("certificates", certsArr);
+
+                // quiz attempts
+                JSONArray attemptsArr = new JSONArray();
+                if (s.getQuizAttemptsByLesson() != null) {
+                    for (Map.Entry<String, List<QuizAttempt>> e : s.getQuizAttemptsByLesson().entrySet()) {
+                        String lessonId = e.getKey();
+                        for (QuizAttempt a : e.getValue()) {
+                            JSONObject at = new JSONObject();
+                            at.put("lessonId", lessonId);
+                            at.put("timestamp", a.getTimestamp());
+                            at.put("score", a.getScore());
+                            at.put("correctCount", a.getCorrectCount());
+                            at.put("totalQuestions", a.getTotalQuestions());
+                            attemptsArr.put(at);
+                        }
+                    }
+                }
+                obj.put("quizAttempts", attemptsArr);
             }
 
-            array.put(obj);
-            
-            if (u instanceof Student s) {
-            obj.put("enrolledCourseIds", new JSONArray(s.getEnrolledCourdseIds()));
-            obj.put("completedLessonIds", new JSONArray(s.getCompletedLesssonIds()));
-
-        // quiz attempts
-        JSONArray attemptsArr = new JSONArray();
-            for (Map.Entry<String, List<QuizAttempt>> e : s.getQuizAttemptsByLesson().entrySet()) {
-                for (QuizAttempt a : e.getValue()) {
-                    JSONObject at = new JSONObject();
-                    at.put("lessonId", e.getKey());
-                    at.put("timestamp", a.getTimestamp());
-                    at.put("score", a.getScore());
-                    at.put("correctCount", a.getCorrectCount());
-                    at.put("totalQuestions", a.getTotalQuestions());
-                    attemptsArr.put(at);
-        }
-    }
-    obj.put("quizAttempts", attemptsArr);
-}
-
-
+            arr.put(obj);
         }
 
         try (PrintWriter pw = new PrintWriter(new FileWriter(USERS_FILE))) {
-            pw.println(array.toString(4));
+            pw.println(arr.toString(4));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public User getUserByEmail(String email) {
-        for (User u : loadUsers()) {
-            if (u.getEmail().equals(email)) return u;
-        }
+        for (User u : loadUsers()) if (u.getEmail().equalsIgnoreCase(email)) return u;
         return null;
     }
 
@@ -212,50 +191,84 @@ public class JsonDatabaseManager {
 
     public void updateUser(User updatedUser) {
         List<User> users = loadUsers();
+        boolean found = false;
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).getUserId() == updatedUser.getUserId()) {
                 users.set(i, updatedUser);
+                found = true;
                 break;
             }
         }
+        if (!found) users.add(updatedUser);
         saveUsers(users);
     }
 
-    // ------------------ COURSES -------------------
-    
+    // ----------------- COURSES -----------------
     public List<Course> loadCourses() {
         ensureDataFilesExist();
         List<Course> courses = new ArrayList<>();
-
         try {
             String content = new String(Files.readAllBytes(Paths.get(COURSES_FILE)));
-            JSONArray array = new JSONArray(content);
+            JSONArray arr = new JSONArray(content);
 
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject obj = array.getJSONObject(i);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
 
-                String courseId = obj.getString("courseId");
-                String title = obj.getString("title");
-                String description = obj.getString("description");
-                String instructorId = obj.getString("instructorId");
+                String courseId = obj.optString("courseId", "");
+                String title = obj.optString("title", "");
+                String description = obj.optString("description", "");
+                String instructorId = obj.optString("instructorId", "");
                 String status = obj.optString("status", "PENDING");
-                   
+
                 Course c = new Course(courseId, title, description, instructorId, status);
 
-                JSONArray studentsArray = obj.optJSONArray("students");
-                if (studentsArray != null) {
-                    for (int j = 0; j < studentsArray.length(); j++)
-                        c.getStudents().add(studentsArray.getString(j));
-                }
+                // students
+                JSONArray studentsArr = obj.optJSONArray("students");
+                if (studentsArr != null) for (int j = 0; j < studentsArr.length(); j++) c.getStudents().add(studentsArr.optString(j));
 
-                JSONArray lessonsArray = obj.optJSONArray("lessons");
-                if (lessonsArray != null) {
-                    for (int j = 0; j < lessonsArray.length(); j++) {
-                        JSONObject lObj = lessonsArray.getJSONObject(j);
+                // lessons
+                JSONArray lessonsArr = obj.optJSONArray("lessons");
+                if (lessonsArr != null) {
+                    for (int j = 0; j < lessonsArr.length(); j++) {
+                        JSONObject lObj = lessonsArr.optJSONObject(j);
+                        if (lObj == null) continue;
+
                         Lesson l = new Lesson();
-                        l.setLessonId(lObj.getString("lessonId"));
-                        l.setTitle(lObj.getString("title"));
-                        l.setContent(lObj.getString("content"));
+                        l.setLessonId(lObj.optString("lessonId", ""));
+                        l.setTitle(lObj.optString("title", ""));
+                        l.setContent(lObj.optString("content", ""));
+
+                        // quiz
+                        if (lObj.has("quiz")) {
+                            JSONObject qObj = lObj.optJSONObject("quiz");
+                            if (qObj != null) {
+                                Quiz quiz = new Quiz();
+                                quiz.setPassingPercentage(qObj.optInt("passingPercentage", 60));
+                                quiz.setMaxAttempts(qObj.optInt("maxAttempts", 0));
+
+                                List<Question> questions = new ArrayList<>();
+                                JSONArray qArr = qObj.optJSONArray("questions");
+                                if (qArr != null) {
+                                    for (int k = 0; k < qArr.length(); k++) {
+                                        JSONObject qItem = qArr.optJSONObject(k);
+                                        if (qItem == null) continue;
+
+                                        String qText = qItem.optString("questionText", "");
+                                        JSONArray opts = qItem.optJSONArray("options");
+                                        List<String> options = new ArrayList<>();
+                                        if (opts != null) for (int m = 0; m < opts.length(); m++) options.add(opts.optString(m, ""));
+
+                                        int correctIndex = qItem.optInt("correctOptionIndex", 0);
+                                        Question question = new Question(qText, options, correctIndex);
+                                        questions.add(question);
+                                    }
+                                }
+
+                                quiz.setQuestions(questions);
+                                l.setQuiz(quiz);
+                            }
+                        }
+
                         c.getLessons().add(l);
                     }
                 }
@@ -266,14 +279,12 @@ public class JsonDatabaseManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return courses;
     }
 
-    
     public void saveCourses(List<Course> courses) {
         ensureDataFilesExist();
-        JSONArray array = new JSONArray();
+        JSONArray arr = new JSONArray();
 
         for (Course c : courses) {
             JSONObject obj = new JSONObject();
@@ -281,33 +292,54 @@ public class JsonDatabaseManager {
             obj.put("title", c.getTitle());
             obj.put("description", c.getDescription());
             obj.put("instructorId", c.getInstructorId());
-            obj.put("students", new JSONArray(c.getStudents()));
             obj.put("status", c.getStatus());
-            
-            JSONArray lessonsArray = new JSONArray();
+            obj.put("students", new JSONArray(c.getStudents()));
+
+            JSONArray lessonsArr = new JSONArray();
             for (Lesson l : c.getLessons()) {
                 JSONObject lObj = new JSONObject();
                 lObj.put("lessonId", l.getLessonId());
                 lObj.put("title", l.getTitle());
                 lObj.put("content", l.getContent());
-                lessonsArray.put(lObj);
-            }
-            obj.put("lessons", lessonsArray);
 
-            array.put(obj);
+                // quiz
+                Quiz quiz = l.getQuiz();
+                if (quiz != null) {
+                    JSONObject qObj = new JSONObject();
+                    qObj.put("passingPercentage", quiz.getPassingPercentage());
+                    qObj.put("maxAttempts", quiz.getMaxAttempts());
+
+                    JSONArray qArr = new JSONArray();
+                    if (quiz.getQuestions() != null) {
+                        for (Question q : quiz.getQuestions()) {
+                            JSONObject qItem = new JSONObject();
+                            qItem.put("questionText", q.getQuestionText());
+                            qItem.put("options", new JSONArray(q.getOptions()));
+                            qItem.put("correctOptionIndex", q.getCorrectOptionIndex());
+                            qArr.put(qItem);
+                        }
+                    }
+                    qObj.put("questions", qArr);
+                    lObj.put("quiz", qObj);
+                }
+
+                lessonsArr.put(lObj);
+            }
+            obj.put("lessons", lessonsArr);
+
+            arr.put(obj);
         }
 
         try (PrintWriter pw = new PrintWriter(new FileWriter(COURSES_FILE))) {
-            pw.println(array.toString(4));
+            pw.println(arr.toString(4));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-
     public Course getCourseById(String courseId) {
         for (Course c : loadCourses()) {
-            if (c.getCourseId().equals(courseId)) return c;
+            if (c.getCourseId() != null && c.getCourseId().equals(courseId)) return c;
         }
         return null;
     }
@@ -320,37 +352,41 @@ public class JsonDatabaseManager {
 
     public void updateCourse(Course updatedCourse) {
         List<Course> courses = loadCourses();
+        boolean found = false;
         for (int i = 0; i < courses.size(); i++) {
             if (courses.get(i).getCourseId().equals(updatedCourse.getCourseId())) {
                 courses.set(i, updatedCourse);
+                found = true;
                 break;
             }
         }
+        if (!found) courses.add(updatedCourse);
         saveCourses(courses);
     }
 
+    // Visible / Approved courses for students
     public List<Course> getVisibleCoursesForStudents() {
-    return loadCourses().stream()
-            .filter(c -> "APPROVED".equalsIgnoreCase(c.getStatus()))
-            .collect(Collectors.toList());
-}
+        return loadCourses().stream()
+                .filter(c -> "APPROVED".equalsIgnoreCase(c.getStatus()))
+                .collect(Collectors.toList());
+    }
 
-    // 2) Approve / Reject Course (admin actions)
+    // Admin actions
     public void approveCourse(String courseId) {
         List<Course> courses = loadCourses();
         for (Course c : courses) {
             if (c.getCourseId().equals(courseId)) {
                 c.setStatus("APPROVED");
                 break;
+            }
         }
-    }
         saveCourses(courses);
     }
 
-        public void rejectCourse(String courseId) {
+    public void rejectCourse(String courseId) {
         List<Course> courses = loadCourses();
-            for (Course c : courses) {
-                if (c.getCourseId().equals(courseId)) {
+        for (Course c : courses) {
+            if (c.getCourseId().equals(courseId)) {
                 c.setStatus("REJECTED");
                 break;
             }
@@ -358,88 +394,83 @@ public class JsonDatabaseManager {
         saveCourses(courses);
     }
 
-// 4) computeCourseStatistics: return a simple Map<String, JSONObject> where key = lessonId,
-// value contains averageScore and completionPercentage
+    // Course statistics (lesson-level)
     public Map<String, JSONObject> computeCourseStatistics(String courseId) {
         Map<String, JSONObject> out = new LinkedHashMap<>();
         List<Course> courses = loadCourses();
         Course target = null;
-            for (Course c : courses) if (c.getCourseId().equals(courseId)) { target = c; break; }
-                if (target == null) return out;
+        for (Course c : courses) if (c.getCourseId().equals(courseId)) {
+            target = c;
+            break;
+        }
+        if (target == null) return out;
 
-            List<String> lessonIds = target.getLessons().stream().map(Lesson::getLessonId).collect(Collectors.toList());
-            List<Student> allStudents = loadUsers().stream()
-            .filter(u -> u instanceof Student)
-            .map(u -> (Student) u)
-            .collect(Collectors.toList());
+        List<String> lessonIds = target.getLessons().stream().map(Lesson::getLessonId).collect(Collectors.toList());
+        List<Student> allStudents = loadUsers().stream()
+                .filter(u -> u instanceof Student)
+                .map(u -> (Student) u)
+                .collect(Collectors.toList());
 
-            for (String lid : lessonIds) {
+        for (String lid : lessonIds) {
             // gather all attempts scores for this lesson from all students
             List<Integer> scores = new ArrayList<>();
             int completedCount = 0;
             for (Student s : allStudents) {
-            List<QuizAttempt> attempts = s.getAttemptsForCourseLesson(courseId, lid);
-            for (QuizAttempt a : attempts) scores.add(a.getScore());
-            if (s.hasCompletedLesson(lid)) completedCount++;
+                List<QuizAttempt> attempts = s.getAttemptsForCourseLesson(null, lid); // implement if needed
+                for (QuizAttempt a : attempts) scores.add(a.getScore());
+                if (s.hasCompletedLesson(lid)) completedCount++;
+            }
+            double avg = scores.isEmpty() ? 0.0 : scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+            double completionPct = allStudents.isEmpty() ? 0.0 : (completedCount * 100.0 / allStudents.size());
+            JSONObject stat = new JSONObject();
+            stat.put("lessonId", lid);
+            stat.put("averageScore", avg);
+            stat.put("completionPercentage", completionPct);
+            stat.put("attemptCount", scores.size());
+            out.put(lid, stat);
         }
-        double avg = scores.isEmpty() ? 0.0 : scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
-        double completionPct = allStudents.isEmpty() ? 0.0 : (completedCount * 100.0 / allStudents.size());
-
-        JSONObject stat = new JSONObject();
-        stat.put("lessonId", lid);
-        stat.put("averageScore", avg);
-        stat.put("completionPercentage", completionPct);
-        stat.put("attemptCount", scores.size());
-        out.put(lid, stat);
-        }
-
         return out;
     }
-    
-        public void recordQuizAttempt(int studentId, String lessonId, QuizAttempt attempt) {
-            List<User> users = loadUsers();
-            for (User u : users) {
-            if (u.getUserId() == studentId && u instanceof Student s) {
-            s.addQuizAttempt(lessonId, attempt);
-            saveUsers(users);
-            return;
-        }
-            }
-        throw new IllegalArgumentException("Student not found: " + studentId);
-        }
 
-        // Check if student passed lesson
-        public boolean hasStudentPassedLesson(int studentId, String lessonId, int passingPercentage) {
-            List<User> users = loadUsers();
-                for (User u : users) {
-                    if (u.getUserId() == studentId && u instanceof Student s) {
-                    return s.hasPassedLesson(lessonId, passingPercentage);
+    // Record a quiz attempt for a student and persist
+    public void recordQuizAttempt(int studentId, String lessonId, QuizAttempt attempt) {
+        List<User> users = loadUsers();
+        for (User u : users) {
+            if (u instanceof Student s && s.getUserId() == studentId) {
+                s.addQuizAttempt(lessonId, attempt);
+                saveUsers(users);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Student not found: " + studentId);
+    }
+
+    // Check if student passed specific lesson
+    public boolean hasStudentPassedLesson(int studentId, String lessonId, int passingPercentage) {
+        List<User> users = loadUsers();
+        for (User u : users) {
+            if (u instanceof Student s && s.getUserId() == studentId) {
+                return s.hasPassedLesson(lessonId, passingPercentage);
             }
         }
         return false;
-        }
-        
-       public boolean isCourseCompleted(Student s, Course c) {
-            // All lessons must be completed
-            for (Lesson lesson : c.getLessons()) {
-                if (!s.hasCompletedLesson(lesson.getLessonId())) {
-                return false;
-            }
+    }
+
+    // Is course completed by the student (all lessons completed)
+    public boolean isCourseCompleted(Student s, Course c) {
+        for (Lesson lesson : c.getLessons()) {
+            if (!s.hasCompletedLesson(lesson.getLessonId())) return false;
         }
         return true;
-        }
-       
-        public Certificate generateCertificate(Student s, Course c) {
+    }
+
+    // Generate certificate and persist to user
+    public Certificate generateCertificate(Student s, Course c) {
         String certId = UUID.randomUUID().toString();
         String date = java.time.LocalDate.now().toString();
-
         Certificate cert = new Certificate(certId, s.getUserId(), c.getCourseId(), date);
         s.addCertificate(cert);
-
-       updateUser(s); // save to users.json
-
-       return cert;
-       }
-
-
+        updateUser(s);
+        return cert;
+    }
 }
