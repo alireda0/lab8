@@ -1,58 +1,76 @@
 [
     {
         "description": "Learn arrays, stacks, queues, lists",
-        "students": ["3"],
+        "students": [
+            "3",
+            "357",
+            "357",
+            "357",
+            "357"
+        ],
         "title": "Data Structures",
         "courseId": "1",
         "instructorId": "1",
         "status": "APPROVED",
-        "lessons": [{
-            "quiz": {
-                "maxAttempts": 3,
-                "passingPercentage": 60,
-                "questions": [
-                    {
-                        "options": [
-                            "O(1)",
-                            "O(n)",
-                            "O(log n)",
-                            "O(n^2)"
-                        ],
-                        "correctOptionIndex": 0,
-                        "questionText": "What is the time complexity to access an element in an array?"
-                    },
-                    {
-                        "options": [
-                            "They can grow dynamically",
-                            "They have a fixed size once created",
-                            "They can hold different data types",
-                            "They use pointers for index access"
-                        ],
-                        "correctOptionIndex": 1,
-                        "questionText": "Which statement is true regarding Java Arrays?"
-                    },
-                    {
-                        "options": [
-                            "5",
-                            "4",
-                            "0",
-                            "-1"
-                        ],
-                        "correctOptionIndex": 1,
-                        "questionText": "If an array has 5 elements, what is the index of the last element?"
-                    }
-                ]
+        "lessons": [
+            {
+                "quiz": {
+                    "maxAttempts": 3,
+                    "passingPercentage": 60,
+                    "questions": [
+                        {
+                            "options": [
+                                "O(1)",
+                                "O(n)",
+                                "O(log n)",
+                                "O(n^2)"
+                            ],
+                            "correctOptionIndex": 0,
+                            "questionText": "What is the time complexity to access an element in an array?"
+                        },
+                        {
+                            "options": [
+                                "They can grow dynamically",
+                                "They have a fixed size once created",
+                                "They can hold different data types",
+                                "They use pointers for index access"
+                            ],
+                            "correctOptionIndex": 1,
+                            "questionText": "Which statement is true regarding Java Arrays?"
+                        }
+                    ]
+                },
+                "lessonId": "1",
+                "title": "Arrays",
+                "content": "Introduction to arrays"
             },
-            "lessonId": "1",
-            "title": "Arrays",
-            "content": "Introduction to arrays"
-        }]
+            {
+                "quiz": {
+                    "maxAttempts": 0,
+                    "passingPercentage": 60,
+                    "questions": [{
+                        "options": [
+                            "rtyui",
+                            "gggg",
+                            "sdfg",
+                            "hhhh"
+                        ],
+                        "correctOptionIndex": 2,
+                        "questionText": "wertyui"
+                    }]
+                },
+                "lessonId": "2",
+                "title": "queues",
+                "content": "Default"
+            }
+        ]
     },
     {
         "description": "Learn the basics of Java, including variables, loops, and OOP concepts.",
         "students": [
             "1001",
-            "1002"
+            "1002",
+            "357"
         ],
         "title": "Introduction to Java Programming",
         "courseId": "C1001",
@@ -146,5 +164,44 @@
         "instructorId": "102",
         "status": "APPROVED",
         "lessons": []
+    },
+    {
+        "description": "integeration and series",
+        "students": [],
+        "title": "maths 2",
+        "courseId": "c109",
+        "instructorId": "1",
+        "status": "PENDING",
+        "lessons": [{
+            "quiz": {
+                "maxAttempts": 0,
+                "passingPercentage": 60,
+                "questions": [
+                    {
+                        "options": [
+                            "gh",
+                            "nh",
+                            "jewe",
+                            "ghjk"
+                        ],
+                        "correctOptionIndex": 2,
+                        "questionText": "dfghjkl"
+                    },
+                    {
+                        "options": [
+                            "gg",
+                            "wwwe",
+                            "eee",
+                            "rrrr"
+                        ],
+                        "correctOptionIndex": 0,
+                        "questionText": "tttt"
+                    }
+                ]
+            },
+            "lessonId": "L1",
+            "title": "integeration by parts",
+            "content": "default"
+        }]
     }
 ]
