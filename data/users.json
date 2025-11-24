@@ -26,27 +26,6 @@
         "certificates": [],
         "quizAttempts": [
             {
-                "score": 0,
-                "totalQuestions": 2,
-                "correctCount": 0,
-                "lessonId": "1",
-                "timestamp": 1763928662979
-            },
-            {
-                "score": 50,
-                "totalQuestions": 2,
-                "correctCount": 1,
-                "lessonId": "1",
-                "timestamp": 1763930214057
-            },
-            {
-                "score": 50,
-                "totalQuestions": 2,
-                "correctCount": 1,
-                "lessonId": "1",
-                "timestamp": 1763930896019
-            },
-            {
                 "score": 100,
                 "totalQuestions": 2,
                 "correctCount": 2,
@@ -54,25 +33,46 @@
                 "timestamp": 1763931792207
             },
             {
-                "score": 100,
-                "totalQuestions": 1,
+                "score": 33,
+                "totalQuestions": 3,
                 "correctCount": 1,
-                "lessonId": "L01",
-                "timestamp": 1763934070802
-            },
-            {
-                "score": 50,
-                "totalQuestions": 2,
-                "correctCount": 1,
-                "lessonId": "L02",
-                "timestamp": 1763934198003
+                "lessonId": "2",
+                "timestamp": 1763947891397
             },
             {
                 "score": 100,
-                "totalQuestions": 2,
+                "totalQuestions": 3,
+                "correctCount": 3,
+                "lessonId": "2",
+                "timestamp": 1763949220004
+            },
+            {
+                "score": 33,
+                "totalQuestions": 3,
+                "correctCount": 1,
+                "lessonId": "2",
+                "timestamp": 1763949249379
+            },
+            {
+                "score": 0,
+                "totalQuestions": 3,
+                "correctCount": 0,
+                "lessonId": "3",
+                "timestamp": 1763947957185
+            },
+            {
+                "score": 66,
+                "totalQuestions": 3,
                 "correctCount": 2,
-                "lessonId": "L02",
-                "timestamp": 1763934302246
+                "lessonId": "3",
+                "timestamp": 1763949044806
+            },
+            {
+                "score": 100,
+                "totalQuestions": 3,
+                "correctCount": 3,
+                "lessonId": "3",
+                "timestamp": 1763949118022
             }
         ],
         "userId": 357,
@@ -82,8 +82,8 @@
         ],
         "completedLessonIds": [
             "1",
-            "L01",
-            "L02"
+            "3",
+            "2"
         ],
         "email": "reda@gmail.com",
         "passwordHash": "8a4665c1246937c22afaff4c257532f076e5735b3a9f778da393b7a17d438847",
@@ -160,5 +160,22 @@
         "email": "admin@skillforge.com",
         "passwordHash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
         "username": "AdminUser"
+    },
+    {
+        "role": "STUDENT",
+        "certificates": [],
+        "quizAttempts": [{
+            "score": 25,
+            "totalQuestions": 4,
+            "correctCount": 1,
+            "lessonId": "1",
+            "timestamp": 1763949458339
+        }],
+        "userId": 12,
+        "enrolledCourseIds": ["1"],
+        "completedLessonIds": [],
+        "email": "mos@gmail.com",
+        "passwordHash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "username": "miso"
     }
 ]
