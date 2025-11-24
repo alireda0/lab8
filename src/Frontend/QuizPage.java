@@ -292,7 +292,7 @@ private void checkAnswer() {
                 "Failed",
                 JOptionPane.WARNING_MESSAGE);
         }
-
+           
         this.dispose();
     }//GEN-LAST:event_btnSubmitActionPerformed
 
