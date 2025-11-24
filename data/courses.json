@@ -408,6 +408,7 @@
             "title": "integeration by parts",
             "content": "default"
         }]
+<<<<<<< Updated upstream
     },
     {
         "description": "kmaps",
@@ -457,5 +458,7 @@
             "title": "logic gates",
             "content": "and-or-not gates"
         }]
+=======
+>>>>>>> Stashed changes
     }
 ]
