@@ -405,7 +405,6 @@ public class JsonDatabaseManager {
         saveCourses(list);
     }
 
-
     public void updateCourse(Course updatedCourse) {
     List<Course> courses = loadCourses(); // reload fresh list from JSON
     boolean found = false;
