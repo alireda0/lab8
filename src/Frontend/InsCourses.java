@@ -10,6 +10,13 @@ import models.Instructor;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import java.awt.BorderLayout;
+import java.util.Map;
 
 /**
  *
@@ -80,6 +87,7 @@ public class InsCourses extends javax.swing.JFrame {
         edit = new javax.swing.JButton();
         delete = new javax.swing.JButton();
         viewEnrolled = new javax.swing.JButton();
+        Insights = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -125,11 +133,18 @@ public class InsCourses extends javax.swing.JFrame {
             }
         });
 
+        Insights.setText("Insights and Analytics");
+        Insights.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                InsightsActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(edit, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -137,7 +152,8 @@ public class InsCourses extends javax.swing.JFrame {
                 .addComponent(delete)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(viewEnrolled, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(Insights))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -147,7 +163,8 @@ public class InsCourses extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(edit)
                     .addComponent(delete)
-                    .addComponent(viewEnrolled))
+                    .addComponent(viewEnrolled)
+                    .addComponent(Insights))
                 .addGap(0, 15, Short.MAX_VALUE))
         );
 
@@ -211,6 +228,66 @@ public class InsCourses extends javax.swing.JFrame {
         new EnrolledStudents(course).setVisible(true);
     }//GEN-LAST:event_viewEnrolledActionPerformed
 
+    private void InsightsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_InsightsActionPerformed
+        int selectedRow = jTable1.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a course to view insights.");
+            return;
+        }
+
+        // 2. Get Course ID
+        String courseId = jTable1.getValueAt(selectedRow, 0).toString();
+        String courseTitle = jTable1.getValueAt(selectedRow, 1).toString();
+
+        // 3. Fetch Data using the Manager methods we added earlier
+        // (Ensure your JsonDatabaseManager has getCourseCompletionRate & getCoursePerformanceData)
+        double completionRate = db.getCourseCompletionRate(courseId);
+        Map<String, Double> lessonStats = db.getCoursePerformanceData(courseId);
+
+        // 4. Create Dataset for JFreeChart
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        if (lessonStats.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No quiz data available for this course yet.");
+            return;
+        }
+
+        for (Map.Entry<String, Double> entry : lessonStats.entrySet()) {
+            // Value, Legend, Category (X-Axis)
+            dataset.addValue(entry.getValue(), "Avg Score", entry.getKey());
+        }
+
+        // 5. Create the Chart
+        JFreeChart barChart = ChartFactory.createBarChart(
+            "Quiz Performance: " + courseTitle, // Chart Title
+            "Lesson Title",                     // X-Axis Label
+            "Average Score (%)",                // Y-Axis Label
+            dataset,                            // Data
+            PlotOrientation.VERTICAL,           // Orientation
+            false,                              // Include Legend
+            true,                               // Tooltips
+            false                               // URLs
+        );
+
+        // 6. Build the Popup Window (JDialog)
+        JDialog chartWindow = new JDialog(this, "Analytics: " + courseTitle, true); // true = modal
+        chartWindow.setSize(800, 600);
+        chartWindow.setLocationRelativeTo(this);
+        chartWindow.setLayout(new BorderLayout());
+
+        // Add Chart
+        ChartPanel chartPanel = new ChartPanel(barChart);
+        chartWindow.add(chartPanel, BorderLayout.CENTER);
+
+        // Add Completion Rate Label at the bottom
+        JLabel lblStats = new JLabel(String.format("  Overall Course Completion Rate: %.1f%%", completionRate));
+        lblStats.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 16));
+        lblStats.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        chartWindow.add(lblStats, BorderLayout.SOUTH);
+
+        // 7. Show it
+        chartWindow.setVisible(true);
+    }//GEN-LAST:event_InsightsActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -247,6 +324,7 @@ public class InsCourses extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Insights;
     private javax.swing.JButton delete;
     private javax.swing.JButton edit;
     private javax.swing.JScrollPane jScrollPane1;
