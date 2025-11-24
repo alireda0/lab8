@@ -32,8 +32,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="129" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="insightsButton" max="32767" attributes="0"/>
-                          <Component id="edit" alignment="0" max="32767" attributes="0"/>
+                          <Component id="edit" alignment="0" pref="133" max="32767" attributes="0"/>
                           <Component id="add" alignment="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -50,9 +49,7 @@
               <Component id="add" min="-2" pref="41" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="edit" min="-2" pref="43" max="-2" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="insightsButton" min="-2" pref="43" max="-2" attributes="0"/>
-              <EmptySpace pref="77" max="32767" attributes="0"/>
+              <EmptySpace pref="42" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -80,14 +77,6 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JButton" name="insightsButton">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Insights &amp; Analytics"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="insightsButtonActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

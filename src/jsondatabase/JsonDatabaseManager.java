@@ -427,4 +427,64 @@ public class JsonDatabaseManager {
             }
         }
     }
+    public double getLessonAverageScore(String lessonId) {
+        List<User> users = loadUsers();
+        double totalScore = 0;
+        int studentCount = 0;
+
+        for (User u : users) {
+            if (u instanceof Student s) {
+                List<QuizAttempt> attempts = s.getAttemptsForLesson(lessonId);
+                if (attempts != null && !attempts.isEmpty()) {
+                    // Use the student's HIGHEST score for the average
+                    int maxScore = 0;
+                    for (QuizAttempt qa : attempts) {
+                        if (qa.getScore() > maxScore) maxScore = qa.getScore();
+                    }
+                    totalScore += maxScore;
+                    studentCount++;
+                }
+            }
+        }
+
+        return studentCount == 0 ? 0.0 : totalScore / studentCount;
+    }
+    public double getCourseCompletionRate(String courseId) {
+        Course c = getCourseById(courseId);
+        if (c == null || c.getLessons().isEmpty()) return 0.0;
+
+        List<User> users = loadUsers();
+        int totalEnrolled = 0;
+        int totalCompletedLessons = 0;
+        int lessonCount = c.getLessons().size();
+
+        for (User u : users) {
+            if (u instanceof Student s && s.getEnrolledCourseIds().contains(courseId)) {
+                totalEnrolled++;
+                // Count how many lessons of THIS course the student has completed
+                for (Lesson l : c.getLessons()) {
+                    if (s.getCompletedLessonIds().contains(l.getLessonId())) {
+                        totalCompletedLessons++;
+                    }
+                }
+            }
+        }
+
+        if (totalEnrolled == 0) return 0.0;
+
+        double totalPossible = totalEnrolled * lessonCount;
+        return (totalCompletedLessons / totalPossible) * 100.0;
+    }
+    public Map<String, Double> getCoursePerformanceData(String courseId) {
+        Course c = getCourseById(courseId);
+        Map<String, Double> data = new LinkedHashMap<>(); // LinkedHashMap keeps order
+        
+        if (c != null) {
+            for (Lesson l : c.getLessons()) {
+                double avg = getLessonAverageScore(l.getLessonId());
+                data.put(l.getTitle(), avg);
+            }
+        }
+        return data;
+    }
 }
