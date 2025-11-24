@@ -250,21 +250,6 @@ public class JsonDatabaseManager {
         }
     }
 
-    /**
-     * Checks if student has exceeded max attempts.
-     */
-    public boolean canTakeQuiz(int studentId, String lessonId, int maxAttempts) {
-        if (maxAttempts <= 0) return true; // Unlimited
-
-        for (User u : loadUsers()) {
-            if (u instanceof Student s && s.getUserId() == studentId) {
-                int used = s.getAttemptsForLesson(lessonId).size();
-                return used < maxAttempts;
-            }
-        }
-        return true; // Default allow if student record implies new
-    }
-
     // ===================================================================
     // COURSES — load (No changes needed here, kept standard)
     // ===================================================================
@@ -538,4 +523,17 @@ public class JsonDatabaseManager {
         }
         return data;
     }
+    public int getQuizAttemptCount(int studentId, String lessonId) {
+    for (User u : loadUsers()) {
+        if (u instanceof Student s && s.getUserId() == studentId) {
+            return s.getAttemptsForLesson(lessonId).size();
+        }
+    }
+    return 0;
+}
+   public boolean canTakeQuiz(int studentId, String lessonId, int maxAttempts) {
+    if (maxAttempts <= 0) return true; // treat 0 as unlimited
+    int used = getQuizAttemptCount(studentId, lessonId);
+    return used < maxAttempts;
+}
 }
